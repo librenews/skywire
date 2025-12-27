@@ -1,0 +1,46 @@
+# Ignore build artifacts
+/_build
+/deps
+*.ez
+
+# Ignore package manager files
+/mix.lock
+
+# Ignore assets
+/priv/static/
+
+# Ignore uploaded files
+/priv/uploads/
+
+# Ignore environment files
+.env
+.env.*
+!.env.example
+
+# Ignore development database
+*.db
+*.db-*
+
+# Ignore test coverage
+/cover
+
+# Ignore documentation
+/doc
+
+# Ignore IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore node modules if any
+node_modules/
+
+# Ignore git
+.git
+.gitignore
