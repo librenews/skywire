@@ -5,6 +5,7 @@ defmodule Skywire.Firehose.Event do
   """
   use Ecto.Schema
 
+  @derive {Jason.Encoder, only: [:seq, :repo, :event_type, :collection, :record, :indexed_at]}
   @primary_key {:seq, :integer, autogenerate: false}
   schema "firehose_events" do
     field :repo, :string
