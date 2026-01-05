@@ -145,11 +145,41 @@ defmodule Skywire.Firehose.Connection do
     # Store the full message as JSONB for now
     # Downstream consumers can decode CAR blocks if needed
     %{
-      "ops" => ops,
+      "ops" => sanitize(ops),
       "repo" => Map.get(message, "repo"),
       "time" => Map.get(message, "time")
     }
   end
 
-  defp extract_record(message), do: message
+  defp extract_record(message), do: sanitize(message)
+
+  defp sanitize(map) when is_map(map) and not is_struct(map) do
+    Map.new(map, fn {k, v} -> {sanitize(k), sanitize(v)} end)
+  end
+
+  defp sanitize(list) when is_list(list) do
+    Enum.map(list, &sanitize/1)
+  end
+
+  # Handle CBOR Tags (CIDs are tag 42)
+  defp sanitize(%CBOR.Tag{tag: 42, value: value}) do
+    # Convert CID bytes to hex string for readability
+    "CID(#{Base.encode16(value, case: :lower)})"
+  end
+
+  defp sanitize(%CBOR.Tag{value: value, tag: tag}) do
+    %{"$tag" => tag, "value" => sanitize(value)}
+  end
+
+  defp sanitize(binary) when is_binary(binary) do
+    if String.valid?(binary) do
+      binary
+    else
+      # Encode non-UTF8 binaries as base64 with prefix
+      "base64:#{Base.encode64(binary)}"
+    end
+  end
+
+  defp sanitize(other), do: other
 end
+
