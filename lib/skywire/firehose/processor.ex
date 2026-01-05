@@ -112,7 +112,7 @@ defmodule Skywire.Firehose.Processor do
           event_type: event.event_type,
           collection: event.collection,
           record: event.record,
-          indexed_at: DateTime.utc_now()
+          indexed_at: DateTime.utc_now() |> DateTime.truncate(:second)
         }
       end)
 
