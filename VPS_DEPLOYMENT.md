@@ -93,7 +93,7 @@ docker compose logs -f app
 You need to initialize the database:
 
 ```bash
-docker compose exec app /app/bin/migrate
+docker compose run --rm app /app/bin/migrate
 ```
 
 ## 6. (Optional but Recommended) Automatic SSL with Caddy

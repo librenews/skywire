@@ -66,11 +66,18 @@ defmodule Skywire.Firehose.Connection do
   end
 
   defp decode_and_process(data) do
-    with {:ok, decoded} <- CBOR.decode(data),
-         :ok <- extract_and_process_event(decoded) do
-      :ok
-    else
-      error -> error
+    case CBOR.decode(data) do
+      {:ok, decoded, _rest} ->
+        extract_and_process_event(decoded)
+        
+      {:ok, decoded} ->
+        extract_and_process_event(decoded)
+
+      {:error, reason} ->
+        {:error, reason}
+        
+      other ->
+        {:error, {:unexpected_return, other}}
     end
   end
 
