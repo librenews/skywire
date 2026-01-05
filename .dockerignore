@@ -4,7 +4,6 @@
 *.ez
 
 # Ignore package manager files
-/mix.lock
 
 # Ignore assets
 /priv/static/
