@@ -162,9 +162,16 @@ defmodule Skywire.Firehose.Connection do
   end
 
   # Handle CBOR Tags (CIDs are tag 42)
-  defp sanitize(%CBOR.Tag{tag: 42, value: value}) do
-    # Convert CID bytes to hex string for readability
+  defp sanitize(%CBOR.Tag{tag: 42, value: %CBOR.Tag{tag: :bytes, value: bytes}}) do
+    "CID(#{Base.encode16(bytes, case: :lower)})"
+  end
+
+  defp sanitize(%CBOR.Tag{tag: 42, value: value}) when is_binary(value) do
     "CID(#{Base.encode16(value, case: :lower)})"
+  end
+
+  defp sanitize(%CBOR.Tag{tag: :bytes, value: bytes}) do
+    sanitize(bytes)
   end
 
   defp sanitize(%CBOR.Tag{value: value, tag: tag}) do
