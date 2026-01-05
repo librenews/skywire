@@ -70,11 +70,16 @@ defmodule Skywire.Firehose.Connection do
 
   defp decode_and_process(data) do
     case CBOR.decode(data) do
-      {:ok, decoded, _rest} ->
-        extract_and_process_event(decoded)
+      # Frame with body (Header + Body)
+      {:ok, header, rest} when byte_size(rest) > 0 ->
+        process_frame_header(header, rest)
         
-      {:ok, decoded} ->
-        extract_and_process_event(decoded)
+      # Frame without body (Header only)
+      {:ok, header, _empty} ->
+        process_frame_header(header, nil)
+        
+      {:ok, header} ->
+        process_frame_header(header, nil)
 
       {:error, reason} ->
         {:error, reason}
@@ -82,6 +87,28 @@ defmodule Skywire.Firehose.Connection do
       other ->
         {:error, {:unexpected_return, other}}
     end
+  end
+
+  defp process_frame_header(%{"op" => 1, "t" => "#commit"}, body_binary) when is_binary(body_binary) do
+    # Commit event: Body contains the actual data
+    case CBOR.decode(body_binary) do
+      {:ok, body, _} -> extract_and_process_event(body)
+      {:ok, body} -> extract_and_process_event(body)
+      error -> error
+    end
+  end
+
+  defp process_frame_header(%{"op" => 1}, _), do: :ok # Missing body?
+  
+  defp process_frame_header(%{"op" => -1}, _rest) do
+    # Error frame
+    Logger.warning("Received error frame from firehose")
+    :ok
+  end
+  
+  defp process_frame_header(header, _rest) do
+    Logger.debug("Skipping frame type: #{inspect(header)}")
+    :ok
   end
 
   defp extract_and_process_event(%{"seq" => seq} = message) do
