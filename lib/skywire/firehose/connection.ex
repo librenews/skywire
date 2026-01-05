@@ -25,6 +25,7 @@ defmodule Skywire.Firehose.Connection do
 
   @impl true
   def handle_frame({:binary, data}, state) do
+    Logger.debug("Received frame: #{byte_size(data)} bytes")
     case decode_and_process(data) do
       :ok ->
         {:ok, state}
@@ -41,6 +42,8 @@ defmodule Skywire.Firehose.Connection do
     Logger.warning("Received unexpected text frame")
     {:ok, state}
   end
+
+
 
   @impl true
   def handle_disconnect(%{reason: reason}, state) do
@@ -95,8 +98,9 @@ defmodule Skywire.Firehose.Connection do
     :ok
   end
 
-  defp extract_and_process_event(_message) do
+  defp extract_and_process_event(message) do
     # Skip messages without seq (e.g., info messages)
+    Logger.warning("Unknown message format: #{inspect(message, limit: :infinity)}")
     :ok
   end
 
