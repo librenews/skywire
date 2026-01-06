@@ -24,6 +24,7 @@ defmodule Skywire.Application do
       Skywire.DataTrimmer,
       
       # Start to serve requests, typically the last entry
+      Skywire.LinkDetector,
       SkywireWeb.Endpoint
     ]
 
