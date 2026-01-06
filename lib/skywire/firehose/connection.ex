@@ -12,181 +12,102 @@ defmodule Skywire.Firehose.Connection do
   require Logger
   alias Skywire.Firehose.{CursorStore, Processor}
 
-  @firehose_url "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
+  # Jetstream URL (e.g., us-east instance)
+  # requesting only posts and reposts to save bandwidth
+  @jetstream_url "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post&wantedCollections=app.bsky.feed.repost"
 
   def start_link(opts) do
+    # Jetstream uses time_us as cursor usually, but we can just start live or resume if we stored it.
+    # For now, let's just start live to simplify, or append cursor if we have one.
+    # Jetstream cursor param is `?cursor=...` (unix microsecond timestamp)
+    
     cursor = CursorStore.get_cursor()
     url = build_url(cursor)
     
-    Logger.info("Connecting to Bluesky firehose from cursor: #{cursor}")
+    Logger.info("Connecting to Bluesky Jetstream: #{url}")
     
+    # Ping interval to keep connection alive
     WebSockex.start_link(url, __MODULE__, %{}, opts)
   end
 
+  # Jetstream sends JSON text frames
   @impl true
-  def handle_frame({:binary, data}, state) do
-    Logger.debug("Received frame: #{byte_size(data)} bytes")
-    case decode_and_process(data) do
-      :ok ->
+  def handle_frame({:text, data}, state) do
+    case Jason.decode(data) do
+      {:ok, %{"kind" => "commit"} = msg} ->
+        process_commit(msg)
+        {:ok, state}
+        
+      {:ok, _other_msg} ->
+        # Ignore account events, identity events, etc.
         {:ok, state}
         
       {:error, reason} ->
-        Logger.error("Failed to process frame: #{inspect(reason)}")
-        # Crash to trigger restart
-        raise "Frame processing failed: #{inspect(reason)}"
+        Logger.error("Failed to decode JSON: #{inspect(reason)}")
+        {:ok, state}
     end
   end
 
   @impl true
-  def handle_frame({:text, _data}, state) do
-    Logger.warning("Received unexpected text frame")
+  def handle_frame({:binary, _data}, state) do
+    Logger.warning("Received unexpected binary frame")
     {:ok, state}
   end
 
-
-
   @impl true
   def handle_disconnect(%{reason: reason}, state) do
-    Logger.warning("Disconnected from firehose: #{inspect(reason)}")
-    # Let the process crash so supervisor can restart it
+    Logger.warning("Disconnected from Jetstream: #{inspect(reason)}")
     {:close, reason, state}
   end
 
   @impl true
   def handle_connect(_conn, state) do
-    Logger.info("Connected to Bluesky firehose")
+    Logger.info("Connected to Jetstream")
     {:ok, state}
   end
 
   ## Private Functions
 
-  defp build_url(cursor) when cursor > 0 do
-    "#{@firehose_url}?cursor=#{cursor}"
+  defp build_url(cursor) when is_integer(cursor) and cursor > 0 do
+    "#{@jetstream_url}&cursor=#{cursor}"
   end
+  defp build_url(_), do: @jetstream_url
 
-  defp build_url(_cursor) do
-    @firehose_url
-  end
+  defp process_commit(%{"commit" => commit, "time_us" => time_us, "did" => repo}) do
+    # Jetstream structure:
+    # {
+    #   "kind": "commit",
+    #   "did": "did:plc:...",
+    #   "time_us": 170...,
+    #   "commit": {
+    #     "collection": "app.bsky.feed.post",
+    #     "record": { ... },
+    #     "rkey": "...",
+    #     "operation": "create",
+    #     "cid": "..."
+    #   }
+    # }
 
-  defp decode_and_process(data) do
-    case CBOR.decode(data) do
-      # Frame with body (Header + Body)
-      {:ok, header, rest} when byte_size(rest) > 0 ->
-        process_frame_header(header, rest)
-        
-      # Frame without body (Header only)
-      {:ok, header, _empty} ->
-        process_frame_header(header, nil)
-        
-      {:ok, header} ->
-        process_frame_header(header, nil)
-
-      {:error, reason} ->
-        {:error, reason}
-        
-      other ->
-        {:error, {:unexpected_return, other}}
+    # We only care about creates (new posts)
+    if commit["operation"] == "create" do
+      event = %{
+        # Use time_us as the distinct sequence/cursor
+        seq: time_us, 
+        repo: repo,
+        # Jetstream uses 'collection' in the inner commit object
+        collection: commit["collection"],
+        # Jetstream provides the 'cid' explicitly
+        cid: commit["cid"],
+        # The record is PRE-DECODED JSON!
+        record: commit["record"],
+        # For compatibility with LinkDetector logic which looks at event_type
+        event_type: "commit" 
+      }
+      
+      Processor.process_event(event)
     end
-  end
-
-  defp process_frame_header(%{"op" => 1, "t" => "#commit"}, body_binary) when is_binary(body_binary) do
-    # Commit event: Body contains the actual data
-    case CBOR.decode(body_binary) do
-      {:ok, body, _} -> extract_and_process_event(body)
-      {:ok, body} -> extract_and_process_event(body)
-      error -> error
-    end
-  end
-
-  defp process_frame_header(%{"op" => 1}, _), do: :ok # Missing body?
-  
-  defp process_frame_header(%{"op" => -1}, _rest) do
-    # Error frame
-    Logger.warning("Received error frame from firehose")
-    :ok
   end
   
-  defp process_frame_header(header, _rest) do
-    Logger.debug("Skipping frame type: #{inspect(header)}")
-    :ok
-  end
-
-  defp extract_and_process_event(%{"seq" => seq} = message) do
-    # Extract relevant fields from the firehose message
-    event = %{
-      seq: seq,
-      repo: Map.get(message, "repo", ""),
-      event_type: Map.get(message, "$type", "unknown"),
-      collection: extract_collection(message),
-      record: extract_record(message)
-    }
-
-    Processor.process_event(event)
-    :ok
-  end
-
-  defp extract_and_process_event(message) do
-    # Skip messages without seq (e.g., info messages)
-    Logger.warning("Unknown message format: #{inspect(message, limit: :infinity)}")
-    :ok
-  end
-
-  defp extract_collection(%{"ops" => [%{"path" => path} | _]}) do
-    # Extract collection from path like "app.bsky.feed.post/..."
-    case String.split(path, "/") do
-      [collection | _] -> collection
-      _ -> nil
-    end
-  end
-
-  defp extract_collection(_), do: nil
-
-  defp extract_record(%{"blocks" => _blocks, "ops" => ops} = message) do
-    # Store the full message as JSONB for now
-    # Downstream consumers can decode CAR blocks if needed
-    %{
-      "ops" => sanitize(ops),
-      "repo" => Map.get(message, "repo"),
-      "time" => Map.get(message, "time")
-    }
-  end
-
-  defp extract_record(message), do: sanitize(message)
-
-  defp sanitize(map) when is_map(map) and not is_struct(map) do
-    Map.new(map, fn {k, v} -> {sanitize(k), sanitize(v)} end)
-  end
-
-  defp sanitize(list) when is_list(list) do
-    Enum.map(list, &sanitize/1)
-  end
-
-  # Handle CBOR Tags (CIDs are tag 42)
-  defp sanitize(%CBOR.Tag{tag: 42, value: %CBOR.Tag{tag: :bytes, value: bytes}}) do
-    "CID(#{Base.encode16(bytes, case: :lower)})"
-  end
-
-  defp sanitize(%CBOR.Tag{tag: 42, value: value}) when is_binary(value) do
-    "CID(#{Base.encode16(value, case: :lower)})"
-  end
-
-  defp sanitize(%CBOR.Tag{tag: :bytes, value: bytes}) do
-    sanitize(bytes)
-  end
-
-  defp sanitize(%CBOR.Tag{value: value, tag: tag}) do
-    %{"$tag" => tag, "value" => sanitize(value)}
-  end
-
-  defp sanitize(binary) when is_binary(binary) do
-    if String.valid?(binary) do
-      binary
-    else
-      # Encode non-UTF8 binaries as base64 with prefix
-      "base64:#{Base.encode64(binary)}"
-    end
-  end
-
-  defp sanitize(other), do: other
+  defp process_commit(_), do: :ok
 end
 
