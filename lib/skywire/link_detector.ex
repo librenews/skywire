@@ -71,24 +71,7 @@ defmodule Skywire.LinkDetector do
     {:noreply, state}
   end
 
-        "app.bsky.feed.repost" ->
-          # Repost payload contains original CID under record.subject.cid
-          orig_cid = get_in(event, ["record", "subject", "cid"])
-          case :ets.lookup(@ets_table, orig_cid) do
-            [{^orig_cid, links}] -> links
-            [] ->
-              # Fallback DB lookup not implemented yet
-              []
-          end
-      end
 
-    if urls != [] do
-      payload = %{event_id: event["seq"], urls: urls, raw: event}
-      Phoenix.PubSub.broadcast(Skywire.PubSub, "link_events", {:link_event, payload})
-    end
-
-    {:noreply, state}
-  end
 
   def handle_cast(_msg, state), do: {:noreply, state}
 
