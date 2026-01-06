@@ -96,7 +96,7 @@ defmodule Skywire.Firehose.Processor do
         Logger.debug("Flushed #{length(events)} events, max_seq: #{max_seq}")
         :ok = CursorStore.set_cursor(max_seq)
         Logger.info("Dispatching events to LinkDetector...")
-        Enum.each(events, &Skywire.LinkDetector.dispatch/1)
+        Skywire.LinkDetector.dispatch_batch(events)
         
       {:error, reason} ->
         Logger.error("Failed to persist batch: #{inspect(reason)}")

@@ -16,8 +16,13 @@ defmodule Skywire.LinkDetector do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  # Accept a list of events for efficiency
+  def dispatch_batch(events) when is_list(events) do
+    GenServer.cast(__MODULE__, {:dispatch_batch, events})
+  end
+
   def dispatch(event) do
-    GenServer.cast(__MODULE__, {:dispatch, event})
+    GenServer.cast(__MODULE__, {:dispatch_batch, [event]})
   end
 
   # -----------------------------------------------------------------
@@ -29,9 +34,17 @@ defmodule Skywire.LinkDetector do
   end
 
   @impl true
-  def handle_cast({:dispatch, event}, state) do
+  def handle_cast({:dispatch_batch, events}, state) do
+    # Process batch
+    Enum.each(events, &process_event/1)
+    {:noreply, state}
+  end
+  
+  def handle_cast(_msg, state), do: {:noreply, state}
+
+  defp process_event(event) do
     # Handle both map entries (from Firehose) and structs (from DB)
-    type = Map.get(event, :event_type) || Map.get(event, "event_type")
+    # type = Map.get(event, :event_type) || Map.get(event, "event_type") # No longer needed
     
     # We only care about commit events which usually have a type
     # But strictly speaking, the firehose stream sets $type on the message, 
@@ -43,39 +56,49 @@ defmodule Skywire.LinkDetector do
     
     collection = Map.get(event, :collection) || Map.get(event, "collection")
     
-    Logger.info("LinkDetector check: type=#{type} collection=#{collection}")
+    # Optional debug sampling (1 in 1000) so we don't flood logs
+    # if :rand.uniform(1000) == 1, do: Logger.debug("LinkDetector sample: #{collection}")
 
     urls =
       case collection do
         "app.bsky.feed.post" ->
           links = extract_links(event)
-          # cache links for reposts using the event's raw CID if we can find it
-          # Connection.ex doesn't explicitly expose the CID of the post yet easily
-          # appearing in ops.
+          
+          # Cache for reposts
+          # Jetstream gives us 'cid' at top level
+          cid = Map.get(event, :cid) || Map.get(event, "cid")
+          if cid && links != [] do
+             :ets.insert(@ets_table, {cid, links})
+          end
+          
           links
 
         "app.bsky.feed.repost" ->
-          # Repost handling requires parsing the record to find the subject
-          # Since currently we don't have full record parsing, we might skip this for now
-          # or try to extract from the sanitized record if possible.
-          []
+          # Repost logic requires parsing the record subject
+          # Record is already a map in Jetstream!
+          record = Map.get(event, :record) || Map.get(event, "record") || %{}
+          subject = Map.get(record, "subject") || %{}
+          orig_cid = Map.get(subject, "cid")
+          
+          if orig_cid do
+            case :ets.lookup(@ets_table, orig_cid) do
+              [{^orig_cid, links}] -> links
+              [] -> [] 
+            end
+          else
+            []
+          end
           
         _ -> []
       end
 
     if urls != [] do
+      # Logger.info("🔗 Found links: #{inspect(urls)}")
       payload = %{event_id: Map.get(event, :seq), urls: urls, raw: event}
       Phoenix.PubSub.broadcast(Skywire.PubSub, "link_events", {:link_event, payload})
     end
-
-    {:noreply, state}
   end
 
-
-
-  def handle_cast(_msg, state), do: {:noreply, state}
-
-  # -----------------------------------------------------------------
   defp extract_links(event) do
     # Try to find facets in the record
     record = Map.get(event, :record) || Map.get(event, "record") || %{}
@@ -90,7 +113,8 @@ defmodule Skywire.LinkDetector do
       features = Map.get(facet, "features") || Map.get(facet, :features) || []
       Enum.map(features, fn feature ->
         type = Map.get(feature, "$type")
-        if type == "app.bsky.richtext.facet.link" do
+        # Match both standard Lexicon ID forms
+        if type in ["app.bsky.richtext.facet.link", "app.bsky.richtext.facet#link"] do
            Map.get(feature, "uri")
         else
            nil
