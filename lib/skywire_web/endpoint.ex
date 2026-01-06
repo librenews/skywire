@@ -15,7 +15,7 @@ defmodule SkywireWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
   socket "/socket", SkywireWeb.UserSocket,
-    websocket: true,
+    websocket: [serializer: [{Phoenix.Socket.V2.JSONSerializer, "~> 2.0.0"}]],
     longpoll: false
   # Serve at "/" the static files from "priv/static" directory.
   #
