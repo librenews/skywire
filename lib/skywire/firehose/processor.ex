@@ -89,11 +89,13 @@ defmodule Skywire.Firehose.Processor do
 
   defp flush_buffer(state) do
     events = Enum.reverse(state.buffer)
+    Logger.info("Flushing buffer with #{length(events)} events")
     
     case persist_batch(events) do
       {:ok, max_seq} ->
         Logger.debug("Flushed #{length(events)} events, max_seq: #{max_seq}")
         :ok = CursorStore.set_cursor(max_seq)
+        Logger.info("Dispatching events to LinkDetector...")
         Enum.each(events, &Skywire.LinkDetector.dispatch/1)
         
       {:error, reason} ->
