@@ -7,6 +7,7 @@ defmodule Skywire.LinkDetector do
   """
 
   use GenServer
+  require Logger
 
   @ets_table :post_links
 
@@ -29,6 +30,7 @@ defmodule Skywire.LinkDetector do
 
   @impl true
   def handle_cast({:dispatch, %{"$type" => type} = event}, state) when type in ["app.bsky.feed.post", "app.bsky.feed.repost"] do
+    Logger.info("LinkDetector received event: #{type}")
     urls =
       case type do
         "app.bsky.feed.post" ->
