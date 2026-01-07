@@ -26,8 +26,15 @@ defmodule SkywireWeb.HealthController do
 
     case Repo.one(query) do
       nil -> 0
-      indexed_at ->
+      %DateTime{} = indexed_at ->
         DateTime.diff(DateTime.utc_now(), indexed_at, :second)
+      %NaiveDateTime{} = naive ->
+        # Assume UTC if naive
+        DateTime.diff(DateTime.utc_now(), DateTime.from_naive!(naive, "Etc/UTC"), :second)
+      _ -> 0
     end
+  rescue
+    _ -> -1 # Return -1 on DB failure so health check doesn't 500
+  end
   end
 end
