@@ -36,5 +36,5 @@ defmodule SkywireWeb.HealthController do
   rescue
     _ -> -1 # Return -1 on DB failure so health check doesn't 500
   end
-  end
+
 end
