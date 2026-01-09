@@ -136,6 +136,8 @@ defmodule Skywire.Firehose.Processor do
         |> Enum.each(fn {event, embedding} ->
            update_event_embedding(event.seq, embedding)
         end)
+        
+        Logger.info("✅ Generated embeddings for #{length(chunk)} posts")
       rescue
         e -> Logger.error("Embedding generation failed: #{inspect(e)}")
       end
