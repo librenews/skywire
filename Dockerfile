@@ -65,6 +65,7 @@ COPY --from=build --chown=nobody:root /app/_build/${MIX_ENV}/rel/skywire ./
 # Create a writable cache directory for Bumblebee/HuggingFace
 RUN mkdir -p /app/.cache && chown -R nobody:root /app/.cache
 ENV XDG_CACHE_HOME=/app/.cache
+ENV HOME=/app
 
 USER nobody
 
