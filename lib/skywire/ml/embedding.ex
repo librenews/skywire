@@ -21,7 +21,7 @@ defmodule Skywire.ML.Embedding do
       Bumblebee.Text.text_embedding(model_info, tokenizer,
         output_pool: :mean_pooling,
         output_attribute: :hidden_state,
-        compile: [batch_size: 16, sequence_length: 128],
+        compile: [batch_size: 32, sequence_length: 128],
         defn_options: [compiler: EXLA]
       )
 

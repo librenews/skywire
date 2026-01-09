@@ -108,24 +108,29 @@ defmodule Skywire.Firehose.Processor do
     end
   end
 
-  defp generate_and_save_embeddings(events) do
     # Filter for posts that look like they have meaningful text
     posts_with_text = Enum.filter(events, fn event ->
       has_valid_text?(event)
     end)
     
-    count = length(posts_with_text)
-    
-    if count > 0 do
-      # Logger.debug("Generating embeddings for #{count} posts...")
-      
-      texts = Enum.map(posts_with_text, &get_text/1)
+    # Process in optimal chunks to match model compilation (batch_size: 16-32)
+    # This avoids massive latency spikes from trying to process 500 at once.
+    posts_with_text
+    |> Enum.chunk_every(32)
+    |> Enum.each(fn chunk ->
+      process_embedding_chunk(chunk)
+    end)
+  end
+
+  defp process_embedding_chunk(chunk) do
+    if length(chunk) > 0 do
+      texts = Enum.map(chunk, &get_text/1)
       
       try do
         embeddings = Skywire.ML.Embedding.generate_batch(texts)
         
         # Update DB
-        Enum.zip(posts_with_text, embeddings)
+        Enum.zip(chunk, embeddings)
         |> Enum.each(fn {event, embedding} ->
            update_event_embedding(event.seq, embedding)
         end)
