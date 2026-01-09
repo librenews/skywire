@@ -43,20 +43,15 @@ defmodule Skywire.Debug do
   end
 
   def embedding_stats do
-    # Ensure app is started so Repo is available
-    Application.ensure_all_started(:skywire)
-
     total = Repo.aggregate(Event, :count, :seq)
     
     with_embedding = from(e in Event, where: not is_nil(e.embedding)) 
                      |> Repo.aggregate(:count, :seq)
                      
-    IO.puts """
-    === Embedding Stats ===
-    Total Events:      #{total}
-    With Embeddings:   #{with_embedding}
-    Coverage:          #{if total > 0, do: Float.round(with_embedding / total * 100, 2), else: 0.0}%
-    =======================
-    """
+    %{
+      total_events: total,
+      with_embeddings: with_embedding,
+      coverage: (if total > 0, do: Float.round(with_embedding / total * 100, 2), else: 0.0)
+    }
   end
 end
