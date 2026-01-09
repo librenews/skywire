@@ -13,7 +13,11 @@ defmodule Skywire.Application do
       {DNSCluster, query: Application.get_env(:skywire, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Skywire.PubSub},
       # Start the Finch HTTP client for sending emails
+      # Start the Finch HTTP client for sending emails
       {Finch, name: Skywire.Finch},
+      
+      # ML / Embeddings (Must start before Processor so it's ready)
+      Skywire.ML.Embedding,
       
       # Skywire firehose components (order matters!)
       Skywire.Firehose.CursorStore,
@@ -23,10 +27,6 @@ defmodule Skywire.Application do
       # Data retention
       Skywire.DataTrimmer,
       
-      # ML / Embeddings
-      # This starts the Nx.Serving process
-      Skywire.ML.Embedding,
-
       # Start to serve requests, typically the last entry
       Skywire.LinkDetector,
       SkywireWeb.Endpoint
