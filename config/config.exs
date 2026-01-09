@@ -31,6 +31,13 @@ config :skywire, SkywireWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :skywire, Skywire.Mailer, adapter: Swoosh.Adapters.Local
 
+# Configures the repository
+config :skywire, Skywire.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  types: Skywire.PostgresTypes,
+  pool_size: 10,
+  migration_primary_key: [name: :id, type: :binary_id]
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
