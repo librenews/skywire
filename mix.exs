@@ -55,7 +55,7 @@ defmodule Skywire.MixProject do
       {:bumblebee, "~> 0.5.3"},
       {:exla, "~> 0.7.1"},
       {:pgvector, "~> 0.3.0"},
-      {:req, "~> 0.4.0"}
+      {:req, "~> 0.5.0"}
     ]
   end
 
