@@ -108,6 +108,7 @@ defmodule Skywire.Firehose.Processor do
     end
   end
 
+  defp generate_and_save_embeddings(events) do
     # Filter for posts that look like they have meaningful text
     posts_with_text = Enum.filter(events, fn event ->
       has_valid_text?(event)
