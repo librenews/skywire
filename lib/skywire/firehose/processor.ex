@@ -128,7 +128,8 @@ defmodule Skywire.Firehose.Processor do
       texts = Enum.map(chunk, &get_text/1)
       
       try do
-        embeddings = Skywire.ML.Embedding.generate_batch(texts)
+        # Use :ingest serving (optimized for throughput)
+        embeddings = Skywire.ML.Embedding.generate_batch(texts, :ingest)
         
         # Update DB
         Enum.zip(chunk, embeddings)

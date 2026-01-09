@@ -1,14 +1,16 @@
 defmodule Skywire.ML.Embedding do
-  @moduledoc """
-  Manages the Bumblebee serving for generating text embeddings.
-  Uses efficient batching via Nx.Serving.
-  """
+  use Supervisor
   require Logger
 
   # Standard efficient embedding model (~384 dim)
   def model_name, do: "sentence-transformers/all-MiniLM-L6-v2"
 
-  def child_spec(_opts) do
+  def start_link(opts) do
+    Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
+  end
+
+  @impl true
+  def init(_opts) do
     Logger.info("Loading embedding model: #{model_name()}...")
     
     # Load model and tokenizer from HuggingFace
@@ -25,33 +27,50 @@ defmodule Skywire.ML.Embedding do
         defn_options: [compiler: EXLA]
       )
 
-    # Return the child spec for the serving process
-    Nx.Serving.child_spec(
-      name: Skywire.EmbeddingServing,
-      serving: serving,
-      batch_timeout: 100
-    )
+    children = [
+      # 1. Ingestion Serving: Optimized for throughput (firehose)
+      #    Longer timeout to allow batches to fill up.
+      Nx.Serving.child_spec(
+        name: Skywire.EmbeddingServing.Ingest,
+        serving: serving,
+        batch_timeout: 100
+      ),
+
+      # 2. API Serving: Optimized for latency (search queries)
+      #    Short timeout to respond ASAP.
+      Nx.Serving.child_spec(
+        name: Skywire.EmbeddingServing.API,
+        serving: serving,
+        batch_timeout: 10
+      )
+    ]
+    
+    Supervisor.init(children, strategy: :one_for_one)
   end
 
   @doc """
   Generates an embedding vector for the given text.
-  Returns a list of floats (size 384).
+  Usage: generate(text, :api) or generate(text, :ingest)
   """
-  def generate(text) when is_binary(text) do
-    result = Nx.Serving.batched_run(Skywire.EmbeddingServing, text)
+  def generate(text, type \\ :api) 
+  
+  def generate(text, type) when is_binary(text) do
+    serving = serving_name(type)
+    result = Nx.Serving.batched_run(serving, text)
     
     result.embedding
     |> Nx.to_flat_list()
   end
   
-  def generate(_), do: nil
+  def generate(_, _), do: nil
 
   @doc """
   Generates embeddings for a list of texts.
-  Returns a list of vectors (lists of floats).
+  Defaults to :ingest serving for high throughput.
   """
-  def generate_batch(texts) when is_list(texts) do
-    result = Nx.Serving.batched_run(Skywire.EmbeddingServing, texts)
+  def generate_batch(texts, type \\ :ingest) when is_list(texts) do
+    serving = serving_name(type)
+    result = Nx.Serving.batched_run(serving, texts)
     
     # Result.embedding is a tensor (batch_size, 384)
     # converting to list of lists
@@ -59,4 +78,7 @@ defmodule Skywire.ML.Embedding do
     |> Nx.to_batched(1)
     |> Enum.map(&(&1 |> Nx.squeeze() |> Nx.to_flat_list()))
   end
+  
+  defp serving_name(:api), do: Skywire.EmbeddingServing.API
+  defp serving_name(:ingest), do: Skywire.EmbeddingServing.Ingest
 end

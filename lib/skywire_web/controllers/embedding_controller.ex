@@ -18,8 +18,8 @@ defmodule SkywireWeb.EmbeddingController do
     limit = Map.get(params, "limit", 10)
     limit = if is_binary(limit), do: String.to_integer(limit), else: limit
     
-    # 1. Generate embedding for query string
-    case Embedding.generate(query) do
+    # 1. Generate embedding for query string using dedicated API serving
+    case Embedding.generate(query, :api) do
       nil ->
         conn |> put_status(400) |> json(%{error: "Failed to generate query embedding"})
       
