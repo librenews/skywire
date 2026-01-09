@@ -49,13 +49,21 @@ defmodule Skywire.Matcher do
     l1 = if is_struct(vec1, Pgvector), do: Pgvector.to_list(vec1), else: vec1
     l2 = if is_struct(vec2, Pgvector), do: Pgvector.to_list(vec2), else: vec2
 
-    # Simple Elixir Dot Product
+    # Dot Product
     dot = 
       Enum.zip(l1, l2)
       |> Enum.reduce(0.0, fn {a, b}, acc -> acc + a * b end)
       
-    # Clamp to -1.0 to 1.0 just in case
-    max(-1.0, min(1.0, dot))
+    # Magnitudes (Norms)
+    mag1 = :math.sqrt(Enum.reduce(l1, 0.0, fn x, acc -> acc + x*x end))
+    mag2 = :math.sqrt(Enum.reduce(l2, 0.0, fn x, acc -> acc + x*x end))
+    
+    # Cosine Similarity = Dot / (Mag1 * Mag2)
+    if mag1 == 0 or mag2 == 0 do
+      0.0
+    else
+      dot / (mag1 * mag2)
+    end
   end
 
   defp dispatch_webhook(sub, event, score) do

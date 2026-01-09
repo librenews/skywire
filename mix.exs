@@ -54,7 +54,8 @@ defmodule Skywire.MixProject do
       # ML & Vector Search
       {:bumblebee, "~> 0.5.3"},
       {:exla, "~> 0.7.1"},
-      {:pgvector, "~> 0.3.0"}
+      {:pgvector, "~> 0.3.0"},
+      {:req, "~> 0.4.0"}
     ]
   end
 
