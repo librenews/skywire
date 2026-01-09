@@ -92,14 +92,16 @@ defmodule Skywire.Firehose.Processor do
     Logger.info("Flushing buffer with #{length(events)} events")
     
     case persist_batch(events) do
-      {:ok, max_seq} ->
+      {:ok, {max_seq, saved_events}} ->
         Logger.debug("Flushed #{length(events)} events, max_seq: #{max_seq}")
         :ok = CursorStore.set_cursor(max_seq)
+        
+        # Dispatch enriched events (with indexed_at)
         Logger.info("Dispatching events to LinkDetector...")
-        Skywire.LinkDetector.dispatch_batch(events)
+        Skywire.LinkDetector.dispatch_batch(saved_events)
         
         # Async embedding generation (fire and forget)
-        Task.start(fn -> generate_and_save_embeddings(events) end)
+        Task.start(fn -> generate_and_save_embeddings(saved_events) end)
         
       {:error, reason} ->
         Logger.error("Failed to persist batch: #{inspect(reason)}")
@@ -190,8 +192,8 @@ defmodule Skywire.Firehose.Processor do
 
       Repo.insert_all(Event, entries, on_conflict: :nothing)
 
-      # Return the maximum seq from this batch
-      Enum.max_by(events, & &1.seq).seq
+      # Return the maximum seq AND the enriched entries
+      {Enum.max_by(events, & &1.seq).seq, entries}
     end)
   end
 end
