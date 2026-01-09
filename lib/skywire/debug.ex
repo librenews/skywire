@@ -43,10 +43,10 @@ defmodule Skywire.Debug do
   end
 
   def embedding_stats do
-    total = Repo.aggregate(Event, :count, :seq)
+    total = Repo.aggregate(Event, :count, :seq, timeout: 60_000)
     
     with_embedding = from(e in Event, where: not is_nil(e.embedding)) 
-                     |> Repo.aggregate(:count, :seq)
+                     |> Repo.aggregate(:count, :seq, timeout: 60_000)
                      
     %{
       total_events: total,
