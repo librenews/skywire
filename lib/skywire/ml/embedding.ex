@@ -70,13 +70,13 @@ defmodule Skywire.ML.Embedding do
   """
   def generate_batch(texts, type \\ :ingest) when is_list(texts) do
     serving = serving_name(type)
-    result = Nx.Serving.batched_run(serving, texts)
+    results = Nx.Serving.batched_run(serving, texts)
     
-    # Result.embedding is a tensor (batch_size, 384)
-    # converting to list of lists
-    result.embedding
-    |> Nx.to_batched(1)
-    |> Enum.map(&(&1 |> Nx.squeeze() |> Nx.to_flat_list()))
+    # Results is a list of maps: [%{embedding: tensor}, ...]
+    results
+    |> Enum.map(fn %{embedding: tensor} ->
+      Nx.to_flat_list(tensor)
+    end)
   end
   
   defp serving_name(:api), do: Skywire.EmbeddingServing.API
