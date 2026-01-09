@@ -41,4 +41,19 @@ defmodule Skywire.Debug do
       
     Repo.all(query)
   end
+
+  def embedding_stats do
+    total = Repo.aggregate(Event, :count, :seq)
+    
+    with_embedding = from(e in Event, where: not is_nil(e.embedding)) 
+                     |> Repo.aggregate(:count, :seq)
+                     
+    IO.puts """
+    === Embedding Stats ===
+    Total Events:      #{total}
+    With Embeddings:   #{with_embedding}
+    Coverage:          #{if total > 0, do: Float.round(with_embedding / total * 100, 2), else: 0.0}%
+    =======================
+    """
+  end
 end
