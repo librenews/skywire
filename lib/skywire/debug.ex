@@ -42,16 +42,27 @@ defmodule Skywire.Debug do
     Repo.all(query)
   end
 
-  def embedding_stats do
-    total = Repo.aggregate(Event, :count, :seq, timeout: 60_000)
+  def check_recent_embeddings(limit \\ 100) do
+    # Ensure app is started
+    Application.ensure_all_started(:skywire)
     
-    with_embedding = from(e in Event, where: not is_nil(e.embedding)) 
-                     |> Repo.aggregate(:count, :seq, timeout: 60_000)
-                     
+    # Just grab the last N events and check them
+    query = from e in Event,
+      order_by: [desc: e.seq],
+      limit: ^limit,
+      select: {e.seq, not is_nil(e.embedding)}
+      
+    results = Repo.all(query, timeout: 15_000)
+    
+    total_checked = length(results)
+    with_embeds = Enum.count(results, fn {_, has_embed} -> has_embed end)
+    
     %{
-      total_events: total,
-      with_embeddings: with_embedding,
-      coverage: (if total > 0, do: Float.round(with_embedding / total * 100, 2), else: 0.0)
+      checked_last_n: total_checked,
+      found_with_embedding: with_embeds,
+      # Return the sequence number of the latest post so we know it's fresh
+      latest_seq: List.first(results) |> elem(0),
+      status: if(with_embeds > 0, do: :working, else: :waiting_for_data)
     }
   end
 end
