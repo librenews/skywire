@@ -25,7 +25,7 @@ defmodule SkywireWeb.EmbeddingController do
       
       vector ->
         # 2. Search DB using Pgvector L2 distance (or cosine distance if normalized)
-        embedding = Pgvector.new(vector)
+        # embedding = Pgvector.new(vector) <--- INCORRECT for Ecto query, pass list directly
         
         results = 
           from(e in Event,
@@ -35,7 +35,7 @@ defmodule SkywireWeb.EmbeddingController do
             # Bumblebee/MiniLM often produce normalized vectors, let's stick to L2 or Cosine.
             # L2 (<->) is good. Cosine is (<=>).
             # Indices usually support L2. We created index with vector_l2_ops.
-            order_by: l2_distance(e.embedding, ^embedding),
+            order_by: l2_distance(e.embedding, ^vector),
             limit: ^limit,
             select: map(e, [:seq, :repo, :record, :indexed_at, :collection])
           )
