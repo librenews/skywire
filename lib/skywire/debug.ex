@@ -65,4 +65,21 @@ defmodule Skywire.Debug do
       status: if(with_embeds > 0, do: :working, else: :waiting_for_data)
     }
   end
+  def check_vector_magnitude do
+    vec = Skywire.ML.Embedding.generate("test string", :api)
+    
+    if vec do
+      sum_sq = Enum.reduce(vec, 0, fn x, acc -> acc + x*x end)
+      magnitude = :math.sqrt(sum_sq)
+      
+      %{
+         status: :ok,
+         vector_length: length(vec),
+         magnitude: magnitude,
+         normalized?: abs(magnitude - 1.0) < 0.01
+      }
+    else
+      %{status: :error, reason: "Model returned nil"}
+    end
+  end
 end

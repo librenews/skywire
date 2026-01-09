@@ -42,7 +42,10 @@ defmodule Skywire.ML.Embedding do
         name: Skywire.EmbeddingServing.API,
         serving: serving,
         batch_timeout: 10
-      )
+      ),
+      
+      # 3. Webhook Matcher
+      Skywire.Matcher
     ]
     
     Supervisor.init(children, strategy: :one_for_one)

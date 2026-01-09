@@ -21,6 +21,10 @@ defmodule SkywireWeb.Router do
     # Semantic Search
     post "/embeddings/generate", EmbeddingController, :generate
     post "/embeddings/search", EmbeddingController, :search
+
+    # Subscriptions (Rails Integration)
+    post "/subscriptions", SubscriptionController, :create
+    delete "/subscriptions/:id", SubscriptionController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

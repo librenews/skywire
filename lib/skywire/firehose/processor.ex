@@ -131,13 +131,19 @@ defmodule Skywire.Firehose.Processor do
         # Use :ingest serving (optimized for throughput)
         embeddings = Skywire.ML.Embedding.generate_batch(texts, :ingest)
         
+        # Zip events with embeddings
+        events_with_embeddings = Enum.zip(chunk, embeddings)
+        
         # Update DB
-        Enum.zip(chunk, embeddings)
+        events_with_embeddings
         |> Enum.each(fn {event, embedding} ->
            update_event_embedding(event.seq, embedding)
         end)
         
         Logger.info("✅ Generated embeddings for #{length(chunk)} posts")
+        
+        # Dispatch to Webhook Matcher
+        Skywire.Matcher.check_matches(events_with_embeddings)
       rescue
         e -> Logger.error("Embedding generation failed: #{inspect(e)}")
       end
