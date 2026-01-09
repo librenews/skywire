@@ -43,6 +43,9 @@ defmodule Skywire.Debug do
   end
 
   def embedding_stats do
+    # Ensure app is started so Repo is available
+    Application.ensure_all_started(:skywire)
+
     total = Repo.aggregate(Event, :count, :seq)
     
     with_embedding = from(e in Event, where: not is_nil(e.embedding)) 
