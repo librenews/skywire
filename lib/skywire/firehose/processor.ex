@@ -98,11 +98,65 @@ defmodule Skywire.Firehose.Processor do
         Logger.info("Dispatching events to LinkDetector...")
         Skywire.LinkDetector.dispatch_batch(events)
         
+        # Async embedding generation (fire and forget)
+        Task.start(fn -> generate_and_save_embeddings(events) end)
+        
       {:error, reason} ->
         Logger.error("Failed to persist batch: #{inspect(reason)}")
         # Crash to trigger restart and replay from last cursor
         raise "Batch persistence failed: #{inspect(reason)}"
     end
+  end
+
+  defp generate_and_save_embeddings(events) do
+    # Filter for posts that look like they have meaningful text
+    posts_with_text = Enum.filter(events, fn event ->
+      has_valid_text?(event)
+    end)
+    
+    count = length(posts_with_text)
+    
+    if count > 0 do
+      # Logger.debug("Generating embeddings for #{count} posts...")
+      
+      texts = Enum.map(posts_with_text, &get_text/1)
+      
+      try do
+        embeddings = Skywire.ML.Embedding.generate_batch(texts)
+        
+        # Update DB
+        Enum.zip(posts_with_text, embeddings)
+        |> Enum.each(fn {event, embedding} ->
+           update_event_embedding(event.seq, embedding)
+        end)
+      rescue
+        e -> Logger.error("Embedding generation failed: #{inspect(e)}")
+      end
+    end
+  end
+
+  defp has_valid_text?(event) do
+    collection = Map.get(event, :collection) || Map.get(event, "collection")
+    if collection == "app.bsky.feed.post" do
+      text = get_text(event)
+      text && String.length(text) > 10 # Only embed posts with some substance
+    else
+      false
+    end
+  end
+
+  defp get_text(event) do
+    record = Map.get(event, :record) || Map.get(event, "record") || %{}
+    Map.get(record, "text")
+  end
+
+  defp update_event_embedding(seq, embedding) do
+    import Ecto.Query
+    vector = Pgvector.new(embedding)
+    
+    # Efficient update by ID
+    from(e in Event, where: e.seq == ^seq)
+    |> Repo.update_all(set: [embedding: vector])
   end
 
   defp persist_batch(events) do

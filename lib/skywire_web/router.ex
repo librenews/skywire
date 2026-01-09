@@ -17,6 +17,10 @@ defmodule SkywireWeb.Router do
     pipe_through [:api, SkywireWeb.Plugs.ApiAuth]
 
     get "/events", EventsController, :index
+    
+    # Semantic Search
+    post "/embeddings/generate", EmbeddingController, :generate
+    post "/embeddings/search", EmbeddingController, :search
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

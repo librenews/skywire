@@ -23,6 +23,10 @@ defmodule Skywire.Application do
       # Data retention
       Skywire.DataTrimmer,
       
+      # ML / Embeddings
+      # This starts the Nx.Serving process
+      Skywire.ML.Embedding,
+
       # Start to serve requests, typically the last entry
       Skywire.LinkDetector,
       SkywireWeb.Endpoint

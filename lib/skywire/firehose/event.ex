@@ -13,5 +13,6 @@ defmodule Skywire.Firehose.Event do
     field :collection, :string
     field :record, :map
     field :indexed_at, :utc_datetime
+    field :embedding, Pgvector.Ecto.Vector
   end
 end

@@ -49,7 +49,12 @@ defmodule Skywire.MixProject do
       # Skywire-specific dependencies
       {:websockex, "~> 0.4.3"},
       {:cbor, "~> 1.0"},
-      {:hackney, "~> 1.18"}
+      {:hackney, "~> 1.18"},
+      
+      # ML & Vector Search
+      {:bumblebee, "~> 0.5.3"},
+      {:exla, "~> 0.7.1"},
+      {:pgvector, "~> 0.3.0"}
     ]
   end
 
