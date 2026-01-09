@@ -4,6 +4,7 @@ defmodule Skywire.Subscriptions do
   """
 
   import Ecto.Query, warn: false
+  import Pgvector.Ecto.Query
   alias Skywire.Repo
   alias Skywire.Subscriptions.Subscription
 
