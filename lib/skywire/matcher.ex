@@ -45,17 +45,13 @@ defmodule Skywire.Matcher do
   end
   
   defp calculate_similarity(vec1, vec2) do
-    # Pgvector returns distance. We can assume vectors are normalized.
-    # Cosine Similarity = dot_product(a, b).
-    # Since we don't have the dot product readily available without Nx call,
-    # let's rely on the fact that L2 distance was used for finding candidates.
-    
-    # Let's perform a precise check here using Nx if we want 100% accuracy on threshold,
-    # or implement dot product in Elixir (slow but ok for single comparison).
-    
+    # Unwrap Pgvector struct if present
+    l1 = if is_struct(vec1, Pgvector), do: Pgvector.to_list(vec1), else: vec1
+    l2 = if is_struct(vec2, Pgvector), do: Pgvector.to_list(vec2), else: vec2
+
     # Simple Elixir Dot Product
     dot = 
-      Enum.zip(vec1, vec2)
+      Enum.zip(l1, l2)
       |> Enum.reduce(0.0, fn {a, b}, acc -> acc + a * b end)
       
     # Clamp to -1.0 to 1.0 just in case
