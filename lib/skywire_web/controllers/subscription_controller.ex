@@ -43,4 +43,29 @@ defmodule SkywireWeb.SubscriptionController do
         |> json(%{error: "Subscription not found"})
     end
   end
+
+  def update(conn, %{"id" => external_id} = params) do
+    # Filter out "id" from params so we don't try to update it
+    attrs = Map.delete(params, "id")
+
+    case Subscriptions.update_subscription_by_external_id(external_id, attrs) do
+      {:ok, subscription} ->
+        json(conn, %{
+          id: subscription.id,
+          external_id: subscription.external_id,
+          status: "updated",
+          threshold: subscription.threshold
+        })
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Subscription not found"})
+      
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Invalid parameters", details: inspect(changeset.errors)})
+    end
+  end
 end

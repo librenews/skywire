@@ -33,6 +33,16 @@ defmodule Skywire.Subscriptions do
     end
   end
 
+  def update_subscription_by_external_id(external_id, attrs) do
+    case get_subscription_by_external_id(external_id) do
+      nil -> {:error, :not_found}
+      sub -> 
+        sub
+        |> Subscription.changeset(attrs)
+        |> Repo.update()
+    end
+  end
+
   @doc """
   Finds subscriptions that match the given embedding vector.
   Uses cosine distance (<=>) or L2 (<->). Using L2 as per index.

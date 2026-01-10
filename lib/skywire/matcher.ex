@@ -32,8 +32,6 @@ defmodule Skywire.Matcher do
 
   defp process_event({event, embedding}) do
     # Find matching subscriptions
-    # TODO: Optimize this. Currently we do 1 query per post.
-    # With 32 posts/batch, that's 32 queries/batch. Fine for now.
     matches = Subscriptions.find_matches(embedding)
     
     Enum.each(matches, fn sub ->
@@ -74,7 +72,8 @@ defmodule Skywire.Matcher do
         uri: event.record["uri"] || "at://#{event.repo}/#{event.collection}/#{event.record["rkey"]}", # Construct URI if creating form record
         text: event.record["text"],
         author: event.repo,
-        indexed_at: event.indexed_at
+        indexed_at: event.indexed_at,
+        raw_record: event.record
       }
     }
     

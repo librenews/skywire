@@ -48,7 +48,8 @@ defmodule SkywireWeb.PreviewChannel do
             uri: event.record["uri"] || "at://#{event.repo}/#{event.collection}/#{event.record["rkey"]}",
             text: event.record["text"],
             author: event.repo,
-            indexed_at: event.indexed_at
+            indexed_at: event.indexed_at,
+            raw_record: event.record
           },
           score: score
         }

@@ -24,6 +24,7 @@ defmodule SkywireWeb.Router do
 
     # Subscriptions (Rails Integration)
     post "/subscriptions", SubscriptionController, :create
+    put "/subscriptions/:id", SubscriptionController, :update
     delete "/subscriptions/:id", SubscriptionController, :delete
   end
 
