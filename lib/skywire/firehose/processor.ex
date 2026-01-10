@@ -146,6 +146,9 @@ defmodule Skywire.Firehose.Processor do
         
         # Dispatch to Webhook Matcher
         Skywire.Matcher.check_matches(events_with_embeddings)
+        
+        # Broadcast to Live Previews
+        broadcast_to_previews(events_with_embeddings)
       rescue
         e -> Logger.error("Embedding generation failed: #{inspect(e)}")
       end
@@ -195,5 +198,11 @@ defmodule Skywire.Firehose.Processor do
       # Return the maximum seq AND the enriched entries
       {Enum.max_by(events, & &1.seq).seq, entries}
     end)
+  end
+
+  defp broadcast_to_previews(events_with_embeddings) do
+    # Broadcast to "firehose" topic.
+    # Payload is simply the list of {event, embedding}
+    Phoenix.PubSub.broadcast(Skywire.PubSub, "firehose", {:new_embeddings, events_with_embeddings})
   end
 end

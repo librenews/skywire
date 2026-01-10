@@ -9,6 +9,7 @@ defmodule SkywireWeb.UserSocket do
 
   ## Channels
   channel "link_events", SkywireWeb.LinkChannel
+  channel "preview", SkywireWeb.PreviewChannel
 
   # Transport configuration (WebSocket only)
 
