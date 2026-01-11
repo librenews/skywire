@@ -59,10 +59,17 @@ defmodule Skywire.ML.Embedding do
   
   def generate(text, type) when is_binary(text) do
     serving = serving_name(type)
-    result = Nx.Serving.batched_run(serving, text)
     
-    result.embedding
-    |> Nx.to_flat_list()
+    try do
+      result = Nx.Serving.batched_run(serving, text)
+      
+      result.embedding
+      |> Nx.to_flat_list()
+    rescue
+      e ->
+        Logger.error("Embedding generation error for '#{text}': #{inspect(e)}")
+        nil
+    end
   end
   
   def generate(_, _), do: nil
