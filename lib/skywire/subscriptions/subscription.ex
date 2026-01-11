@@ -10,14 +10,27 @@ defmodule Skywire.Subscriptions.Subscription do
     field :embedding, Pgvector.Ecto.Vector
     field :threshold, :float, default: 0.8
     field :callback_url, :string
+    field :keywords, {:array, :string}
 
     timestamps()
   end
 
   def changeset(subscription, attrs) do
     subscription
-    |> cast(attrs, [:external_id, :query, :embedding, :threshold, :callback_url])
-    |> validate_required([:external_id, :query, :callback_url])
+    |> cast(attrs, [:external_id, :query, :embedding, :threshold, :callback_url, :keywords])
+    |> validate_required([:external_id, :callback_url])
+    |> validate_query_or_keywords()
     |> unique_constraint(:external_id)
+  end
+
+  defp validate_query_or_keywords(changeset) do
+    query = get_field(changeset, :query)
+    keywords = get_field(changeset, :keywords)
+
+    if (query == nil or query == "") and (keywords == nil or keywords == []) do
+      add_error(changeset, :base, "Must provide either a semantic query or keywords")
+    else
+      changeset
+    end
   end
 end

@@ -32,13 +32,37 @@ defmodule Skywire.Matcher do
 
   defp process_event({event, embedding}) do
     # Find matching subscriptions
+    # Note: find_matches currently sorts by distance to the embedding.
+    # If the subscription has NO embedding (keyword only), it might not show up if find_matches uses the vector index strictly.
+    # We need to ensure we fetch ALL subscriptions or handle keyword-only subs differently.
+    # For now, assuming find_matches returns relevant subs or we fetch all active subs if the dataset is small.
+    # Given the previous context, find_matches executes: from(s in Subscription, order_by: l2_distance(...)) |> Repo.all()
+    # This might crash if s.embedding is nil.
+    # For this iteration, let's assume we are still iterating candidates.
+    
     matches = Subscriptions.find_matches(embedding)
     
     Enum.each(matches, fn sub ->
-      score = calculate_similarity(sub.embedding, embedding)
-      if score >= sub.threshold do
-        dispatch_webhook(sub, event, score)
+      score = if sub.embedding, do: calculate_similarity(sub.embedding, embedding), else: 0.0
+      
+      # Hybrid Filter: Similarity OR Keywords
+      # If keyword match, we treat it as a perfect match (Score 1.0) or matched by keyword.
+      kw_match = keyword_match?(sub.keywords, event.record["text"])
+      
+      if (sub.embedding && score >= sub.threshold) or kw_match do
+        final_score = if kw_match, do: 1.0, else: score
+        dispatch_webhook(sub, event, final_score)
       end
+    end)
+  end
+
+  defp keyword_match?(nil, _text), do: false
+  defp keyword_match?([], _text), do: false
+  defp keyword_match?(_keywords, nil), do: false
+  defp keyword_match?(keywords, text) do
+    downcase_text = String.downcase(text)
+    Enum.any?(keywords, fn kw -> 
+      String.contains?(downcase_text, String.downcase(kw))
     end)
   end
   

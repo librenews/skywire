@@ -17,7 +17,7 @@ defmodule Skywire.Firehose.Processor do
   alias Skywire.Repo
   alias Skywire.Firehose.{Event, CursorStore}
 
-  @batch_size 500
+  @batch_size 100
   @flush_interval_ms 100
   @max_buffer_size 2000
 
@@ -188,7 +188,8 @@ defmodule Skywire.Firehose.Processor do
           repo: event.repo,
           event_type: event.event_type,
           collection: event.collection,
-          record: event.record,
+          collection: event.collection,
+          record: sanitize_record(event.record),
           indexed_at: DateTime.utc_now() |> DateTime.truncate(:second)
         }
       end)
@@ -197,7 +198,7 @@ defmodule Skywire.Firehose.Processor do
 
       # Return the maximum seq AND the enriched entries
       {Enum.max_by(events, & &1.seq).seq, entries}
-    end)
+    end, timeout: 60_000)
   end
 
   defp broadcast_to_previews(events_with_embeddings) do
@@ -205,4 +206,15 @@ defmodule Skywire.Firehose.Processor do
     # Payload is simply the list of {event, embedding}
     Phoenix.PubSub.broadcast(Skywire.PubSub, "firehose", {:new_embeddings, events_with_embeddings})
   end
+
+  defp sanitize_record(record) when is_map(record) do
+    Map.new(record, fn {k, v} -> {k, sanitize_record(v)} end)
+  end
+  defp sanitize_record(list) when is_list(list) do
+    Enum.map(list, &sanitize_record/1)
+  end
+  defp sanitize_record(binary) when is_binary(binary) do
+    String.replace(binary, "\0", "")
+  end
+  defp sanitize_record(other), do: other
 end

@@ -26,9 +26,10 @@ Register a new semantic search filter.
   ```json
   {
     "external_id": "rails-db-id-123",      // Your internal ID for this alert
-    "query": "ruby on rails performance",  // The semantic query to embed
-    "threshold": 0.82,                     // Similarity threshold (0.0 - 1.0)
-    "callback_url": "https://yourapp.com/webhooks/skywire"
+    "query": "ruby on rails performance",  // Optional: Semantic query
+    "threshold": 0.82,                     // Optional: Defaults to 0.8
+    "callback_url": "https://yourapp.com/webhooks/skywire",
+    "keywords": ["rails", "performance"]   // Optional: Match if textual match OR semantic match
   }
   ```
 - **Response** (`201 Created`):
@@ -51,7 +52,8 @@ Modify criteria for an existing subscription.
   ```json
   {
     "threshold": 0.9,
-    "callback_url": "https://new-url.com"
+    "callback_url": "https://new-url.com",
+    "keywords": ["new", "keywords"]
   }
   ```
 - **Response** (`200 OK`): Matches the Create response.
@@ -91,8 +93,19 @@ When a firehose post matches a subscription, Skywire sends a POST request to you
     }
   }
   ```
+- **Payload**:
+  ```json
+  {
+    "subscription_id": "rails-db-id-123",
+    "match_score": 1.0,  // 1.0 indicates a strict keyword match
+    "post": { ... }
+  }
+  ```
 - **Notes**:
-  - `raw_record` contains the exact JSON received from the Bluesky firehose, enabling full parsing of facets (links/mentions), embeds (images/external cards), and replies.
+  - **Match Logic**: `(Semantic Score >= Threshold) OR (Any Keyword Match)`.
+  - If a keyword matches, the `match_score` is set to `1.0`.
+  - You must provide either a `query` or `keywords` (or both).
+  - `raw_record` contains the exact JSON received from the Bluesky firehose.
 
 ---
 
