@@ -14,8 +14,7 @@ defmodule Skywire.Firehose.Processor do
   """
   use GenServer
   require Logger
-  alias Skywire.Repo
-  alias Skywire.Firehose.{Event, CursorStore}
+  alias Skywire.Firehose.CursorStore
 
   @batch_size 100
   @flush_interval_ms 100
@@ -88,70 +87,73 @@ defmodule Skywire.Firehose.Processor do
   end
 
   defp flush_buffer(state) do
-    events = Enum.reverse(state.buffer)
+    # Enrich with timestamp immediately
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    
+    events = 
+      state.buffer
+      |> Enum.reverse()
+      |> Enum.map(fn e -> Map.put(e, :indexed_at, now) end)
+
     Logger.info("Flushing buffer with #{length(events)} events")
     
-    case persist_batch(events) do
-      {:ok, {max_seq, saved_events}} ->
-        Logger.debug("Flushed #{length(events)} events, max_seq: #{max_seq}")
-        :ok = CursorStore.set_cursor(max_seq)
-        
-        # Dispatch enriched events (with indexed_at)
-        Logger.info("Dispatching events to LinkDetector...")
-        Skywire.LinkDetector.dispatch_batch(saved_events)
-        
-        # Async embedding generation (fire and forget)
-        Task.start(fn -> generate_and_save_embeddings(saved_events) end)
-        
+    # 1. Analyze texts & Generate Embeddings
+    # We do this FIRST so we can index the complete document
+    events_with_embeddings = generate_embeddings_for_batch(events)
+    
+    # 2. Index to OpenSearch
+    case Skywire.Search.OpenSearch.bulk_index(events_with_embeddings) do
+      {:ok, _resp} ->
+         Logger.debug("Indexed #{length(events)} events to OpenSearch")
+         
+         # 3. Update Cursor
+         max_seq = Enum.max_by(events, & &1.seq).seq
+         :ok = CursorStore.set_cursor(max_seq)
+         
+         # 4. Dispatch to downstream consumers
+         Skywire.LinkDetector.dispatch_batch(events)
+         Skywire.Matcher.check_matches(events_with_embeddings)
+         broadcast_to_previews(events_with_embeddings)
+         
       {:error, reason} ->
-        Logger.error("Failed to persist batch: #{inspect(reason)}")
-        # Crash to trigger restart and replay from last cursor
-        raise "Batch persistence failed: #{inspect(reason)}"
+         Logger.error("Failed to index batch to OpenSearch: #{inspect(reason)}")
+         raise "OpenSearch indexing failed: #{inspect(reason)}"
     end
   end
 
-  defp generate_and_save_embeddings(events) do
-    # Filter for posts that look like they have meaningful text
-    posts_with_text = Enum.filter(events, fn event ->
-      has_valid_text?(event)
-    end)
+  defp generate_embeddings_for_batch(events) do
+    # Filter for valid text
+    # We want to keep ALL events for the index (even without text/embedding), 
+    # but only generate embeddings for those with text.
     
-    # Process in optimal chunks to match model compilation (batch_size: 16-32)
-    # This avoids massive latency spikes from trying to process 500 at once.
-    posts_with_text
-    |> Enum.chunk_every(32)
-    |> Enum.each(fn chunk ->
-      process_embedding_chunk(chunk)
-    end)
-  end
-
-  defp process_embedding_chunk(chunk) do
-    if length(chunk) > 0 do
-      texts = Enum.map(chunk, &get_text/1)
+    # Extract texts where available
+    texts_and_indices = 
+      events
+      |> Enum.with_index()
+      |> Enum.filter(fn {event, _idx} -> has_valid_text?(event) end)
       
-      try do
-        # Use :ingest serving (optimized for throughput)
-        embeddings = Skywire.ML.Embedding.generate_batch(texts, :ingest)
+    if texts_and_indices == [] do
+      # No text to embed, return events with nil embeddings
+      Enum.map(events, &{&1, nil})
+    else
+      texts = Enum.map(texts_and_indices, fn {event, _} -> get_text(event) end)
+      
+      # Generate batch embeddings
+      # Note: If batch size is 100, this might be slightly large for one call?
+      # Nx.Serving handles batching internally, so it's fine.
+      embeddings = Skywire.ML.Embedding.generate_batch(texts, :ingest)
+      
+      # Create a map of index -> embedding
+      embedding_map = 
+        Enum.zip(texts_and_indices, embeddings)
+        |> Map.new(fn {{_, idx}, emb} -> {idx, emb} end)
         
-        # Zip events with embeddings
-        events_with_embeddings = Enum.zip(chunk, embeddings)
-        
-        # Update DB
-        events_with_embeddings
-        |> Enum.each(fn {event, embedding} ->
-           update_event_embedding(event.seq, embedding)
-        end)
-        
-        Logger.info("✅ Generated embeddings for #{length(chunk)} posts")
-        
-        # Dispatch to Webhook Matcher
-        Skywire.Matcher.check_matches(events_with_embeddings)
-        
-        # Broadcast to Live Previews
-        broadcast_to_previews(events_with_embeddings)
-      rescue
-        e -> Logger.error("Embedding generation failed: #{inspect(e)}")
-      end
+      # Merge back
+      events
+      |> Enum.with_index()
+      |> Enum.map(fn {event, idx} -> 
+        {event, Map.get(embedding_map, idx)}
+      end)
     end
   end
 
@@ -170,51 +172,7 @@ defmodule Skywire.Firehose.Processor do
     Map.get(record, "text")
   end
 
-  defp update_event_embedding(seq, embedding) do
-    import Ecto.Query
-    vector = Pgvector.new(embedding)
-    
-    # Efficient update by ID
-    from(e in Event, where: e.seq == ^seq)
-    |> Repo.update_all(set: [embedding: vector])
-  end
-
-  defp persist_batch(events) do
-    Repo.transaction(fn ->
-      # Insert all events in a single batch
-      entries = Enum.map(events, fn event ->
-        %{
-          seq: event.seq,
-          repo: event.repo,
-          event_type: event.event_type,
-          collection: event.collection,
-          collection: event.collection,
-          record: sanitize_record(event.record),
-          indexed_at: DateTime.utc_now() |> DateTime.truncate(:second)
-        }
-      end)
-
-      Repo.insert_all(Event, entries, on_conflict: :nothing)
-
-      # Return the maximum seq AND the enriched entries
-      {Enum.max_by(events, & &1.seq).seq, entries}
-    end, timeout: 60_000)
-  end
-
   defp broadcast_to_previews(events_with_embeddings) do
-    # Broadcast to "firehose" topic.
-    # Payload is simply the list of {event, embedding}
     Phoenix.PubSub.broadcast(Skywire.PubSub, "firehose", {:new_embeddings, events_with_embeddings})
   end
-
-  defp sanitize_record(record) when is_map(record) do
-    Map.new(record, fn {k, v} -> {k, sanitize_record(v)} end)
-  end
-  defp sanitize_record(list) when is_list(list) do
-    Enum.map(list, &sanitize_record/1)
-  end
-  defp sanitize_record(binary) when is_binary(binary) do
-    String.replace(binary, "\0", "")
-  end
-  defp sanitize_record(other), do: other
 end

@@ -7,6 +7,12 @@ defmodule Skywire.Application do
 
   @impl true
   def start(_type, _args) do
+    # Ensure OpenSearch index exists
+    Task.start(fn -> 
+      Process.sleep(5000) # Wait a bit for OS to boot if running concurrently
+      Skywire.Search.OpenSearch.setup() 
+    end)
+    
     children = [
       SkywireWeb.Telemetry,
       Skywire.Repo,

@@ -47,26 +47,17 @@ defmodule Skywire.Subscriptions do
   Finds subscriptions that match the given embedding vector.
   Uses cosine distance (<=>) or L2 (<->). Using L2 as per index.
   """
-  def find_matches(embedding_vector, limit \\ 100) do
-    # Find subscriptions where the distance is small enough.
-    # Note: threshold is usually "similarity" (0.8), but pgvector uses "distance".
-    # Cosine Distance = 1 - Cosine Similarity.
-    # So if threshold is 0.8 (high similarity), we want distance < 0.2.
-    
-    # However, we are using L2 distance in the index.
-    # For normalized vectors, L2 distance is related to cosine distance.
-    # L2^2 = 2 * (1 - CosineSimilarity).
-    # This is getting complicated. Let's stick to Cosine Distance (<=>) in query
-    # since that effectively maps to similarity.
-    
-    # We will fetch all subscriptions and filter in memory if the list is small,
-    # OR we can do it in DB if we trust the index.
-    # Let's query using the operator.
-    
-    from(s in Subscription,
-      order_by: l2_distance(s.embedding, ^embedding_vector)
-    )
-    |> Repo.all()
-    # We will refine the matching logic in the Matcher process to precise thresholding.
+  def find_matches(embedding_vector, _limit \\ 100) do
+    if is_nil(embedding_vector) do
+      # No embedding (e.g. image post), return all subs to check for keyword matches
+      Repo.all(Subscription)
+    else
+      # Fetch all and let Matcher sort/filter. 
+      # Ideally we would limit, but for alerting we need Recall > Precision.
+      from(s in Subscription,
+        order_by: l2_distance(s.embedding, ^embedding_vector)
+      )
+      |> Repo.all()
+    end
   end
 end
