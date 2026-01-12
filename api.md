@@ -121,21 +121,24 @@ Before creating a subscription, use this channel to show users a live stream of 
 2.  Join channel `preview` with the following params:
     ```json
     {
-      "query": "ruby on rails",
-      "threshold": 0.8
+      "query": "ruby on rails",   // Optional: Semantic Query
+      "threshold": 0.8,           // Optional: Default 0.8
+      "keywords": ["rails", "gems"] // Optional: Keyword Filter
     }
     ```
+    *Must provide either `query` or `keywords`.*
 
 ### Events
 Listen for the `new_match` event.
 
 - **Event Name**: `new_match`
+- **Match Logic**: `(Score >= Threshold) OR (Keyword Match)`
 - **Payload**:
   ```json
   {
     "matches": [
       {
-        "score": 0.88,
+        "score": 0.88, // 1.0 if keyword match
         "post": {
           "uri": "at://did:...",
           "text": "Rails 8 is coming!",
