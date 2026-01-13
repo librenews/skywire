@@ -24,9 +24,14 @@ defmodule SkywireWeb.Plugs.ApiAuth do
   defp verify_token(token) do
     token_hash = hash_token(token)
     
-    case Repo.get_by(Token, token_hash: token_hash, active: true) do
-      nil -> {:error, :invalid_token}
-      token_record -> {:ok, token_record}
+    case Skywire.Redis.command(["GET", "api_token:#{token_hash}"]) do
+      {:ok, nil} -> {:error, :invalid_token}
+      {:ok, json_payload} ->
+        case Jason.decode(json_payload) do
+          {:ok, %{"active" => true} = record} -> {:ok, record}
+          _ -> {:error, :invalid_token}
+        end
+      _ -> {:error, :redis_error}
     end
   end
 

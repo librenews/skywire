@@ -24,6 +24,9 @@ defmodule Skywire.Application do
       
       # ML / Embeddings (Must start before Processor so it's ready)
       Skywire.ML.Embedding,
+
+      # Redis Client
+      Skywire.Redis,
       
       # Skywire firehose components (order matters!)
       Skywire.Firehose.CursorStore,

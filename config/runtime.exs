@@ -119,5 +119,6 @@ end
 
 # Skywire-specific configuration
 config :skywire,
-  event_retention_days: String.to_integer(System.get_env("EVENT_RETENTION_DAYS") || "7")
+  event_retention_days: String.to_integer(System.get_env("EVENT_RETENTION_DAYS") || "7"),
+  redis_url: System.get_env("REDIS_URL") || "redis://localhost:6379"
 

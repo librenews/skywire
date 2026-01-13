@@ -24,7 +24,9 @@ services:
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-skywire}
       
       # OpenSearch Connection
+      # OpenSearch Connection
       OPENSEARCH_URL: http://opensearch:9200
+      REDIS_URL: redis://redis:6379
       
       # Phoenix secrets
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
@@ -58,6 +60,13 @@ services:
     ports:
       - "9200:9200"
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data:
   opensearch_data:
+  redis_data:

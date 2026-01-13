@@ -24,13 +24,9 @@ defmodule Skywire.Release do
     token = :crypto.strong_rand_bytes(32) |> Base.url_encode64(padding: false)
     token_hash = :crypto.hash(:sha256, token) |> Base.encode16(case: :lower)
 
-    # Save to database
-    {:ok, _} = Skywire.Repo.insert(%Skywire.Auth.Token{
-      name: name,
-      token_hash: token_hash,
-      scopes: [],
-      active: true
-    })
+    # Save to Redis
+    payload = Jason.encode!(%{name: name, active: true, created_at: DateTime.utc_now()})
+    {:ok, "OK"} = Skywire.Redis.command(["SET", "api_token:#{token_hash}", payload])
 
     IO.puts("""
 

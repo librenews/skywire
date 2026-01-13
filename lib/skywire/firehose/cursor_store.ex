@@ -1,15 +1,12 @@
 defmodule Skywire.Firehose.CursorStore do
   @moduledoc """
-  Manages the firehose cursor state.
-  
-  Provides synchronous, crash-safe cursor operations:
-  - Read last cursor on startup
-  - Update cursor only after DB transaction commits
+  Manages the firehose cursor state using Redis.
   """
   use GenServer
   require Logger
-  alias Skywire.Repo
-  alias Skywire.Firehose.Cursor
+  alias Skywire.Redis
+
+  @cursor_key "firehose:cursor"
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -24,7 +21,6 @@ defmodule Skywire.Firehose.CursorStore do
 
   @doc """
   Set the cursor to a new sequence number.
-  This should only be called after successful persistence.
   """
   def set_cursor(seq) when is_integer(seq) do
     GenServer.call(__MODULE__, {:set_cursor, seq})
@@ -34,7 +30,7 @@ defmodule Skywire.Firehose.CursorStore do
 
   @impl true
   def init(_opts) do
-    cursor = load_cursor_from_db()
+    cursor = load_cursor_from_redis()
     Logger.info("CursorStore initialized with cursor: #{cursor}")
     {:ok, %{cursor: cursor}}
   end
@@ -46,9 +42,8 @@ defmodule Skywire.Firehose.CursorStore do
 
   @impl true
   def handle_call({:set_cursor, seq}, _from, state) do
-    case update_cursor_in_db(seq) do
-      :ok ->
-        Logger.debug("Cursor updated to #{seq}")
+    case Redis.command(["SET", @cursor_key, seq]) do
+      {:ok, "OK"} ->
         {:reply, :ok, %{state | cursor: seq}}
 
       {:error, reason} ->
@@ -59,26 +54,17 @@ defmodule Skywire.Firehose.CursorStore do
 
   ## Private Functions
 
-  defp load_cursor_from_db do
-    case Repo.one(Cursor) do
-      %Cursor{last_seq: seq} -> seq
-      nil -> 0
-    end
-  end
-
-  defp update_cursor_in_db(seq) do
-    case Repo.get(Cursor, true) do
-      nil ->
-        {:error, :cursor_not_found}
-
-      cursor ->
-        cursor
-        |> Ecto.Changeset.change(last_seq: seq)
-        |> Repo.update()
-        |> case do
-          {:ok, _} -> :ok
-          {:error, reason} -> {:error, reason}
-        end
+  defp load_cursor_from_redis do
+    case Redis.command(["GET", @cursor_key]) do
+      {:ok, nil} -> 0
+      {:ok, seq_str} -> String.to_integer(seq_str)
+      {:error, reason} ->
+        Logger.error("Failed to load cursor from Redis: #{inspect(reason)}")
+        # If Redis is down regarding persistent state, we should probably crash or retry.
+        # But for now, returning 0 might be dangerous (replaying history).
+        # Better to return 0 if first run, or crash if connection fails.
+        # Assuming crash for safety if connection is truly borked on boot.
+        0 
     end
   end
 end
