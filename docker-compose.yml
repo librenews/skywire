@@ -1,14 +1,4 @@
 services:
-  db:
-    image: pgvector/pgvector:pg15
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-skywire}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   app:
     build: .
     ports:
@@ -20,10 +10,9 @@ services:
       retries: 3
       start_period: 300s
     environment:
-      # Connect to the local 'db' service defined above
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-skywire}
-      
-      # OpenSearch Connection
+      # Hugging Face Token (for model download)
+      HF_TOKEN: ${HF_TOKEN}
+
       # OpenSearch Connection
       OPENSEARCH_URL: http://opensearch:9200
       REDIS_URL: redis://redis:6379

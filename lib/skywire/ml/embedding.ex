@@ -17,9 +17,11 @@ defmodule Skywire.ML.Embedding do
     opts = if auth_token, do: [auth_token: auth_token], else: []
 
     # Load model and tokenizer from HuggingFace
-    {:ok, model_info} = Bumblebee.load_model({:hf, model_name()}, opts)
-    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, model_name()}, opts)
-
+    # Load model and tokenizer from HuggingFace
+    # We use a helper to catch 403 errors and print helpful instructions
+    {:ok, model_info} = load_resource(:model, model_name(), opts)
+    {:ok, tokenizer} = load_resource(:tokenizer, model_name(), opts)
+      
     # Create a serving process with EXLA compilation
     # Mean pooling gives us a single vector per sentence
     serving =
@@ -29,6 +31,7 @@ defmodule Skywire.ML.Embedding do
         compile: [batch_size: 32, sequence_length: 128],
         defn_options: [compiler: EXLA]
       )
+
 
     children = [
       # 1. Ingestion Serving: Optimized for throughput (firehose)
@@ -94,4 +97,44 @@ defmodule Skywire.ML.Embedding do
   
   defp serving_name(:api), do: Skywire.EmbeddingServing.API
   defp serving_name(:ingest), do: Skywire.EmbeddingServing.Ingest
+
+  defp load_resource(type, name, opts) do
+    loader = if type == :model, do: &Bumblebee.load_model/2, else: &Bumblebee.load_tokenizer/2
+    
+    case loader.({:hf, name}, opts) do
+      {:ok, resource} -> {:ok, resource}
+      {:error, reason} ->
+        if String.contains?(inspect(reason), "403") do
+          Logger.error("""
+          
+          ==================================================
+          ❌ HUGGING FACE AUTHENTICATION ERROR (403)
+          ==================================================
+          Failed to download #{type}: #{name}
+          
+          The Hugging Face API rejected the request. This usually means:
+          1. Your IP is being rate-limited.
+          2. The HF_TOKEN environment variable is invalid/expired.
+          3. You are missing an HF_TOKEN.
+
+          ACTION REQUIRED:
+          Please generate a User Access Token (Read) at:
+          https://huggingface.co/settings/tokens
+          
+          And add it to your .env file:
+          HF_TOKEN=hf_...
+          ==================================================
+          """)
+        else
+          Logger.error("Failed to load #{type} #{name}: #{inspect(reason)}")
+        end
+        recraise(reason)
+    end
+  end
+
+  defp recraise(reason) do
+    # We must crash to stop startup, but we want the log to be seen first.
+    Process.sleep(100) 
+    raise "Model loading failed: #{inspect(reason)}"
+  end
 end
