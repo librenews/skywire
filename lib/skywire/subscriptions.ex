@@ -113,3 +113,4 @@ defmodule Skywire.Subscriptions do
       "threshold" => sub.threshold
     }
   end
+end
