@@ -15,7 +15,7 @@ defmodule Skywire.Search.OpenSearch do
   @doc """
   Create the index with k-NN vector mapping if it doesn't exist.
   """
-  end
+
 
   @percolator_index "skywire_subs"
 

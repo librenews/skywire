@@ -37,9 +37,7 @@ defmodule Skywire.Release do
     """)
   end
 
-  defp repos do
-    Application.fetch_env!(@app, :ecto_repos)
-  end
+
 
   defp load_app do
     Application.load(@app)
