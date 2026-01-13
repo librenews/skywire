@@ -6,29 +6,48 @@ defmodule SkywireWeb.SubscriptionController do
 
   action_fallback SkywireWeb.FallbackController
 
-  def create(conn, %{"external_id" => _eid, "query" => query} = params) do
-    # 1. Generate embedding for the query
-    # Using :api serving for low latency
-    case Embedding.generate(query, :api) do
-      nil ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Failed to generate embedding for query"})
+  require Logger
 
-      vector ->
-        # 2. Merge vector into params
-        attrs = Map.put(params, "embedding", vector)
+  def create(conn, %{"external_id" => _eid} = params) do
+    # Handle optional query
+    query = params["query"]
+    
+    vector_result = 
+      if query && query != "" do
+        Embedding.generate(query, :api)
+      else
+        nil
+      end
 
-        # 3. Create subscription
-        with {:ok, subscription} <- Subscriptions.create_subscription(attrs) do
-          conn
-          |> put_status(:created)
-          |> json(%{
-            id: subscription.id,
-            external_id: subscription.external_id,
-            status: "active"
-          })
-        end
+    # If query was provided but generation failed
+    if query && query != "" && vector_result == nil do
+         conn
+         |> put_status(:bad_request)
+         |> json(%{error: "Failed to generate embedding for query"})
+    else
+         attrs = 
+           if vector_result do
+             Map.put(params, "embedding", vector_result)
+           else
+             params
+           end
+
+         case Subscriptions.create_subscription(attrs) do
+           {:ok, subscription} ->
+             conn
+             |> put_status(:created)
+             |> json(%{
+               id: subscription.id,
+               external_id: subscription.external_id,
+               status: "active"
+             })
+             
+           {:error, changeset} ->
+             Logger.error("Subscription creation failed: #{inspect(changeset.errors)}")
+             conn
+             |> put_status(:unprocessable_entity)
+             |> json(%{error: "Invalid parameters", details: inspect(changeset.errors)})
+         end
     end
   end
 
@@ -63,6 +82,7 @@ defmodule SkywireWeb.SubscriptionController do
         |> json(%{error: "Subscription not found"})
       
       {:error, changeset} ->
+        Logger.error("Subscription update failed: #{inspect(changeset.errors)}")
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{error: "Invalid parameters", details: inspect(changeset.errors)})

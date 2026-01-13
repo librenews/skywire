@@ -15,7 +15,19 @@ defmodule Skywire.Search.OpenSearch do
   @doc """
   Create the index with k-NN vector mapping if it doesn't exist.
   """
+  end
+
+  @percolator_index "skywire_subs"
+
+  @doc """
+  Setup indices for both Data (firehose) and Queries (percolator).
+  """
   def setup do
+    setup_data_index()
+    setup_percolator_index()
+  end
+
+  defp setup_data_index do
     url = "#{base_url()}/#{@index_name}"
     
     mapping = %{
@@ -35,12 +47,10 @@ defmodule Skywire.Search.OpenSearch do
               space_type: "l2"
             }
           },
-          text: %{type: "text"}, # Standard Lucene analyzer
+          text: %{type: "text"}, 
           uri: %{type: "keyword"},
           author: %{type: "keyword"}, # Exact match for DIDs
           indexed_at: %{type: "date"},
-          # Store the full raw record as a non-indexed object if we want, 
-          # but usually flattened fields are better. Let's store raw as object with dynamic: false
           raw_record: %{
             type: "object", 
             dynamic: false 
@@ -49,13 +59,37 @@ defmodule Skywire.Search.OpenSearch do
       }
     }
 
-    # Check existence
+    create_if_missing(url, mapping, @index_name)
+  end
+
+  defp setup_percolator_index do
+    url = "#{base_url()}/#{@percolator_index}"
+
+    mapping = %{
+      mappings: %{
+        properties: %{
+          # The query itself
+          query: %{
+            type: "percolator"
+          },
+          # Fields we can filter on (metadata about the sub)
+          threshold: %{ type: "float" },
+          external_id: %{ type: "keyword" },
+          callback_url: %{ type: "keyword" }
+        }
+      }
+    }
+    
+    create_if_missing(url, mapping, @percolator_index)
+  end
+
+  defp create_if_missing(url, mapping, name) do
     case Req.head!(url).status do
       200 -> 
-        Logger.info("OpenSearch index '#{@index_name}' already exists.")
+        Logger.info("OpenSearch index '#{name}' already exists.")
         :ok
       404 ->
-        Logger.info("Creating OpenSearch index '#{@index_name}'...")
+        Logger.info("Creating OpenSearch index '#{name}'...")
         case Req.put(url, json: mapping) do
           {:ok, %{status: 200}} -> :ok
           {:error, reason} -> {:error, reason}
@@ -105,5 +139,81 @@ defmodule Skywire.Search.OpenSearch do
       body: body, 
       headers: [{"content-type", "application/x-ndjson"}]
     )
+  end
+
+  @doc """
+  Percolate a batch of documents against the registered subscriptions.
+  Returns list of matches.
+  """
+  def percolate_batch(events_with_embeddings) do
+    # Multi-Percolate Header (target index)
+    header = Jason.encode!(%{index: @index_name})
+    
+    body = 
+      events_with_embeddings
+      |> Enum.map(fn {event, embedding} ->
+        # The document to match against
+        doc = %{
+          embedding: embedding,
+          text: event.record["text"],
+          author: event.repo
+        }
+        
+        # We need the doc itself in the query part
+        query_part = %{
+           query: %{
+             percolate: %{
+               field: "query",
+               document: doc
+             }
+           }
+        }
+        
+        # Msearch/Mpercolate format: Header \n Query \n
+        [header, Jason.encode!(query_part)]
+      end)
+      |> List.flatten()
+      |> Enum.join("\n")
+      
+    body = body <> "\n"
+
+    # NOTE: We query the SUBSCRIPTION index (@percolator_index) using the msearch endpoint
+    # wait... mpercolate isn't a standard endpoint in OS 2.x, it uses _msearch.
+    # But wait, Percolate query creates a match.
+    # Actually, proper way is standard _msearch against the PERCOLATOR index.
+    
+    url = "#{base_url()}/#{@percolator_index}/_msearch"
+    
+    case Req.post(url, body: body, headers: [{"content-type", "application/x-ndjson"}]) do
+      {:ok, %{status: 200, body: %{"responses" => responses}}} ->
+        # Correlate responses with events
+        Enum.zip(events_with_embeddings, responses)
+        |> Enum.map(fn {{event, _emb}, resp} ->
+           hits = resp["hits"]["hits"] || []
+           {event, hits}
+        end)
+      
+      {:error, reason} -> 
+        Logger.error("Percolate error: #{inspect(reason)}")
+        []
+    end
+  end
+
+  def index_subscription(id, doc) do
+    url = "#{base_url()}/#{@percolator_index}/_doc/#{id}"
+    Req.put(url, json: doc)
+  end
+
+  def delete_subscription(id) do
+    url = "#{base_url()}/#{@percolator_index}/_doc/#{id}"
+    Req.delete(url)
+  end
+
+  def get_subscription(id) do
+    url = "#{base_url()}/#{@percolator_index}/_doc/#{id}"
+    case Req.get(url) do
+      {:ok, %{status: 200, body: %{"_source" => source}}} -> {:ok, source}
+      _ -> {:error, :not_found}
+    end
   end
 end

@@ -15,7 +15,6 @@ defmodule Skywire.Application do
     
     children = [
       SkywireWeb.Telemetry,
-      Skywire.Repo,
       {DNSCluster, query: Application.get_env(:skywire, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Skywire.PubSub},
       # Start the Finch HTTP client for sending emails

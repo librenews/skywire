@@ -28,7 +28,6 @@ Register a new semantic search filter.
     "external_id": "rails-db-id-123",      // Your internal ID for this alert
     "query": "ruby on rails performance",  // Optional: Semantic query
     "threshold": 0.82,                     // Optional: Defaults to 0.8
-    "callback_url": "https://yourapp.com/webhooks/skywire",
     "keywords": ["rails", "performance"]   // Optional: Match if textual match OR semantic match
   }
   ```
@@ -41,8 +40,6 @@ Register a new semantic search filter.
   }
   ```
 
-  ```
-
 ### Update Subscription
 Modify criteria for an existing subscription.
 
@@ -52,14 +49,13 @@ Modify criteria for an existing subscription.
   ```json
   {
     "threshold": 0.9,
-    "callback_url": "https://new-url.com",
     "keywords": ["new", "keywords"]
   }
   ```
 - **Response** (`200 OK`): Matches the Create response.
 
 ### Delete Subscription
-Stop receiving webhooks for a specific alert.
+Stop receiving events for a specific alert.
 
 - **Endpoint**: `DELETE /api/subscriptions/:id`
   - *:id* matches the `external_id` provided during creation.
@@ -67,45 +63,78 @@ Stop receiving webhooks for a specific alert.
 
 ---
 
-## 3. Webhook Delivery (HTTP)
+## 3. Event Consumption (Redis Streams)
 
-When a firehose post matches a subscription, Skywire sends a POST request to your `callback_url`.
+Skywire outputs matches to a Redis Stream. Webhooks are no longer supported for high-volume delivery.
 
-- **Method**: `POST`
-- **Headers**: `Content-Type: application/json`
-- **Payload**:
-  ```json
-  {
-    "subscription_id": "rails-db-id-123",
-    "match_score": 0.89,
-    "post": {
-      "uri": "at://did:plc:123/app.bsky.feed.post/3k...",
+- **Stream Key**: `skywire:matches`
+- **Field**: `data` (JSON String)
+
+### Payload Format
+The `data` field contains a JSON string with the following structure:
+
+```json
+{
+  "subscription_id": "rails-db-id-123",
+  "match_score": 0.89, // 1.0 if keyword match
+  "post": {
+    "uri": "at://did:plc:123/app.bsky.feed.post/3k...",
+    "text": "Just launched a new gem for Ruby on Rails! #ruby",
+    "author": "did:plc:12345...",
+    "indexed_at": "2024-01-10T12:00:00Z",
+    "raw_record": {
+      "$type": "app.bsky.feed.post",
+      "createdAt": "2024-01-10T12:00:00Z",
       "text": "Just launched a new gem for Ruby on Rails! #ruby",
-      "author": "did:plc:12345...",
-      "indexed_at": "2024-01-10T12:00:00Z",
-      "raw_record": {
-        "$type": "app.bsky.feed.post",
-        "createdAt": "2024-01-10T12:00:00Z",
-        "text": "Just launched a new gem for Ruby on Rails! #ruby",
-        "facets": [ ... ],
-        "embed": { ... }
-      }
+      "facets": [ ... ],
+      "embed": { ... }
     }
   }
-  ```
-- **Payload**:
-  ```json
-  {
-    "subscription_id": "rails-db-id-123",
-    "match_score": 1.0,  // 1.0 indicates a strict keyword match
-    "post": { ... }
-  }
-  ```
-- **Notes**:
-  - **Match Logic**: `(Semantic Score >= Threshold) OR (Any Keyword Match)`.
-  - If a keyword matches, the `match_score` is set to `1.0`.
-  - You must provide either a `query` or `keywords` (or both).
-  - `raw_record` contains the exact JSON received from the Bluesky firehose.
+}
+```
+
+### Rails / Ruby Consumer Example
+
+Use a background worker to consume the stream.
+
+```ruby
+# app/services/skywire_consumer.rb
+class SkywireConsumer
+  STREAM_KEY = "skywire:matches"
+  GROUP_NAME = "rails_app"
+  CONSUMER_NAME = "worker_1"
+
+  def self.start
+    r = Redis.new(url: ENV.fetch("REDIS_URL"))
+
+    # 1. Create Consumer Group (if not exists)
+    begin
+      r.xgroup(:create, STREAM_KEY, GROUP_NAME, "$", mkstream: true)
+    rescue Redis::CommandError => e
+      puts "Group already exists"
+    end
+
+    puts "🎧 Listening for matches..."
+
+    loop do
+      # Block for 2 seconds waiting for new items
+      events = r.xreadgroup(GROUP_NAME, CONSUMER_NAME, { STREAM_KEY => ">" }, block: 2000, count: 10)
+
+      events.each do |_stream, entries|
+        entries.each do |id, fields|
+          data = JSON.parse(fields["data"])
+          process_match(data)
+          r.xack(STREAM_KEY, GROUP_NAME, id)
+        end
+      end
+    end
+  end
+
+  def self.process_match(data)
+    puts "Match for #{data['subscription_id']}: #{data['post']['text']}"
+  end
+end
+```
 
 ---
 

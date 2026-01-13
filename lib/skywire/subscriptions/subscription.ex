@@ -9,7 +9,7 @@ defmodule Skywire.Subscriptions.Subscription do
     field :query, :string
     field :embedding, Pgvector.Ecto.Vector
     field :threshold, :float, default: 0.8
-    field :callback_url, :string
+    # field :callback_url, :string # Deprecated
     field :keywords, {:array, :string}
 
     timestamps()
@@ -17,8 +17,8 @@ defmodule Skywire.Subscriptions.Subscription do
 
   def changeset(subscription, attrs) do
     subscription
-    |> cast(attrs, [:external_id, :query, :embedding, :threshold, :callback_url, :keywords])
-    |> validate_required([:external_id, :callback_url])
+    |> cast(attrs, [:external_id, :query, :embedding, :threshold, :keywords])
+    |> validate_required([:external_id])
     |> validate_query_or_keywords()
     |> unique_constraint(:external_id)
   end

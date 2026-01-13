@@ -5,16 +5,11 @@ defmodule Skywire.Release do
   @app :skywire
 
   def migrate do
-    load_app()
-
-    for repo <- repos() do
-      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
-    end
+    IO.puts "No SQL migrations to run (NoSQL Mode)"
   end
 
-  def rollback(repo, version) do
-    load_app()
-    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
+  def rollback(_repo, _version) do
+    IO.puts "No SQL migrations to rollback (NoSQL Mode)"
   end
 
   def gen_token(name) do
