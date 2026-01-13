@@ -13,9 +13,12 @@ defmodule Skywire.ML.Embedding do
   def init(_opts) do
     Logger.info("Loading embedding model: #{model_name()}...")
     
+    auth_token = System.get_env("HF_TOKEN")
+    opts = if auth_token, do: [auth_token: auth_token], else: []
+
     # Load model and tokenizer from HuggingFace
-    {:ok, model_info} = Bumblebee.load_model({:hf, model_name()})
-    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, model_name()})
+    {:ok, model_info} = Bumblebee.load_model({:hf, model_name()}, opts)
+    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, model_name()}, opts)
 
     # Create a serving process with EXLA compilation
     # Mean pooling gives us a single vector per sentence

@@ -11,30 +11,16 @@ ssh root@your-server-ip
 
 Install Docker & Docker Compose:
 ```bash
-# Remove old versions
-apt-get remove docker docker-engine docker.io containerd runc
+# Remove old versions (just in case)
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
 
-# Set up repository
-apt-get update
-apt-get install \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
+# Install using the official convenience script
+curl -fsSL https://get.docker.com | sh
 
-mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Install Docker Engine
-apt-get update
-apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-# Verify
-docker compose version
+# Configure System for OpenSearch (Critical!)
+# Increase max_map_count for the JVM
+sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" >> /etc/sysctl.conf
 ```
 
 ## 2. Clone Repository

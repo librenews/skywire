@@ -25,3 +25,7 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 skywire-*.tar
 
+
+# Environment Variables
+.env
+.env*.local
