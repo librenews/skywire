@@ -66,6 +66,8 @@ defmodule Skywire.Matcher do
     end)
   end
   
+  defp calculate_similarity(nil, _vec2), do: 0.0
+  defp calculate_similarity(_vec1, nil), do: 0.0
   defp calculate_similarity(vec1, vec2) do
     # Unwrap Pgvector struct if present
     l1 = if is_struct(vec1, Pgvector), do: Pgvector.to_list(vec1), else: vec1
