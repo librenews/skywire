@@ -16,7 +16,7 @@ defmodule Skywire.Firehose.Processor do
   require Logger
   alias Skywire.Firehose.CursorStore
 
-  @batch_size 100
+  @batch_size 25
   @flush_interval_ms 100
   @max_buffer_size 2000
 
@@ -52,7 +52,11 @@ defmodule Skywire.Firehose.Processor do
 
     # Check if we've exceeded max buffer size (backpressure failure)
     if new_size > @max_buffer_size do
-      Logger.error("Buffer overflow! Size: #{new_size}. Crashing to trigger restart.")
+      # Logger.error("Buffer overflow! Size: #{new_size}. Crashing to trigger restart.")
+      # Instead of crashing, let's drop the oldest? No, crashing is safer for now.
+      # But frequent crashes might be bad.
+      # Let's drop if > max
+      # Actually, crashing allows the supervisor to backoff.
       raise "Buffer overflow - database writes too slow"
     end
 
@@ -99,12 +103,15 @@ defmodule Skywire.Firehose.Processor do
     
     # 1. Analyze texts & Generate Embeddings
     # We do this FIRST so we can index the complete document
+    Logger.debug("Generating embeddings...")
     events_with_embeddings = generate_embeddings_for_batch(events)
+    Logger.debug("Embeddings generated.")
     
     # 2. Index to OpenSearch
+    Logger.debug("Indexing to OpenSearch...")
     case Skywire.Search.OpenSearch.bulk_index(events_with_embeddings) do
       {:ok, _resp} ->
-         Logger.debug("Indexed #{length(events)} events to OpenSearch")
+         Logger.info("Indexed #{length(events)} events to OpenSearch")
          
          # 3. Update Cursor
          max_seq = Enum.max_by(events, & &1.seq).seq

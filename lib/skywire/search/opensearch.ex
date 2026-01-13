@@ -135,7 +135,8 @@ defmodule Skywire.Search.OpenSearch do
 
     Req.post("#{base_url()}/_bulk", 
       body: body, 
-      headers: [{"content-type", "application/x-ndjson"}]
+      headers: [{"content-type", "application/x-ndjson"}],
+      receive_timeout: 30_000
     )
   end
 
