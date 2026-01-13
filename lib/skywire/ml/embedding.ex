@@ -101,7 +101,9 @@ defmodule Skywire.ML.Embedding do
   defp load_resource(type, name, opts) do
     loader = if type == :model, do: &Bumblebee.load_model/2, else: &Bumblebee.load_tokenizer/2
     
-    case loader.({:hf, name}, opts) do
+    # Bumblebee expects auth_token inside the {:hf, ...} tuple options, NOT as a 2nd arg.
+    # We call load_model({:hf, name, opts}, [])
+    case loader.({:hf, name, opts}, []) do
       {:ok, resource} -> {:ok, resource}
       {:error, reason} ->
         if String.contains?(inspect(reason), "403") do
