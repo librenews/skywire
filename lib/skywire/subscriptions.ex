@@ -6,7 +6,7 @@ defmodule Skywire.Subscriptions do
   alias Skywire.Subscriptions.Subscription
 
   alias Skywire.Search.OpenSearch
-  alias Skywire.Auth.Validator # We will need a validator for changesets if we drop Ecto schema validation
+
 
   # We can still use the Ecto Schema for changeset validation, but we won't insert into Repo.
   

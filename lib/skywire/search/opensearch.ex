@@ -12,9 +12,7 @@ defmodule Skywire.Search.OpenSearch do
     System.get_env("OPENSEARCH_URL") || "http://localhost:9200"
   end
 
-  @doc """
-  Create the index with k-NN vector mapping if it doesn't exist.
-  """
+
 
 
   @percolator_index "skywire_subs"

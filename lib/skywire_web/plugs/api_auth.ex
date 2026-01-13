@@ -3,8 +3,7 @@ defmodule SkywireWeb.Plugs.ApiAuth do
   Plug for authenticating API requests via Bearer token.
   """
   import Plug.Conn
-  alias Skywire.Repo
-  alias Skywire.Auth.Token
+
 
   def init(opts), do: opts
 
