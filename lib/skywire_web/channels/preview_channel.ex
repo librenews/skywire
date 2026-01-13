@@ -66,7 +66,7 @@ defmodule SkywireWeb.PreviewChannel do
       kw_match = keyword_match?(keywords, event.record["text"])
 
       # 3. Hybrid OR Logic
-      if (query_vec && semantic_score >= threshold) or kw_match do
+      if (query_vec && semantic_score >= threshold) || kw_match do
         final_score = if kw_match, do: 1.0, else: semantic_score
         
         payload = %{
