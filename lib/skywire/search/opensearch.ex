@@ -136,7 +136,7 @@ defmodule Skywire.Search.OpenSearch do
     Req.post("#{base_url()}/_bulk", 
       body: body, 
       headers: [{"content-type", "application/x-ndjson"}],
-      receive_timeout: 30_000
+      receive_timeout: 60_000
     )
   end
 
@@ -183,7 +183,7 @@ defmodule Skywire.Search.OpenSearch do
     
     url = "#{base_url()}/#{@percolator_index}/_msearch"
     
-    case Req.post(url, body: body, headers: [{"content-type", "application/x-ndjson"}], receive_timeout: 30_000) do
+    case Req.post(url, body: body, headers: [{"content-type", "application/x-ndjson"}], receive_timeout: 60_000) do
       {:ok, %{status: 200, body: %{"responses" => responses}}} ->
         # Correlate responses with events
         Enum.zip(events_with_embeddings, responses)
