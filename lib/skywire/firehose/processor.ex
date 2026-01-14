@@ -168,8 +168,14 @@ defmodule Skywire.Firehose.Processor do
   defp has_valid_text?(event) do
     collection = Map.get(event, :collection) || Map.get(event, "collection")
     if collection == "app.bsky.feed.post" do
-      text = get_text(event)
-      text && String.length(text) > 10 # Only embed posts with some substance
+      record = Map.get(event, :record) || Map.get(event, "record") || %{}
+      text = Map.get(record, "text")
+      langs = Map.get(record, "langs") || []
+      
+      # Filter: Must be English (or unknown lang) AND > 10 chars
+      is_english = Enum.empty?(langs) or "en" in langs
+      
+      text && String.length(text) > 10 && is_english
     else
       false
     end
