@@ -6,7 +6,15 @@ defmodule Skywire.Firehose.CursorStore do
   require Logger
   alias Skywire.Redis
 
-  @cursor_key "firehose:cursor"
+  # Base key, will be suffixed with partition
+  @base_cursor_key "firehose:cursor"
+
+  defp cursor_key do
+    case System.get_env("JETSTREAM_PARTITION") do
+      nil -> @base_cursor_key
+      part -> "#{@base_cursor_key}:#{part}"
+    end
+  end
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -42,7 +50,7 @@ defmodule Skywire.Firehose.CursorStore do
 
   @impl true
   def handle_call({:set_cursor, seq}, _from, state) do
-    case Redis.command(["SET", @cursor_key, seq]) do
+    case Redis.command(["SET", cursor_key(), seq]) do
       {:ok, "OK"} ->
         {:reply, :ok, %{state | cursor: seq}}
 
@@ -55,7 +63,7 @@ defmodule Skywire.Firehose.CursorStore do
   ## Private Functions
 
   defp load_cursor_from_redis do
-    case Redis.command(["GET", @cursor_key]) do
+    case Redis.command(["GET", cursor_key()]) do
       {:ok, nil} -> 0
       {:ok, seq_str} -> String.to_integer(seq_str)
       {:error, reason} ->

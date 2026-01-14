@@ -144,6 +144,7 @@ defmodule Skywire.Firehose.Processor do
       Enum.map(events, &{&1, nil})
     else
       texts = Enum.map(texts_and_indices, fn {event, _} -> get_text(event) end)
+      Logger.info("Generating embeddings for #{length(texts)} (out of #{length(events)}) events...")
       
       # Generate batch embeddings
       # Note: If batch size is 100, this might be slightly large for one call?
