@@ -33,14 +33,36 @@ services:
       # This allows EXLA to use all 4 CPUs to speed up generation.
       # XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       
-      # ML Memory: Limit XLA to 20% of system RAM (approx 3.2GB on 16GB node).
-      # This gives plenty of room for large batches.
+      # ML Memory: Limit XLA to 20% of system RAM.
       XLA_PYTHON_CLIENT_MEM_FRACTION: "0.20"
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      
-      # GLIBC Fragmentation Fix
-      # 8 Cores needed? Bump to 4 concurrent arenas to avoid locking.
       MALLOC_ARENA_MAX: "4"
+      
+      # Partitioning: Main App is Partition 0/2
+      JETSTREAM_PARTIES: "2"
+      JETSTREAM_PARTITION: "0"
+
+  app-worker:
+    build: .
+    restart: always
+    environment:
+      PHX_HOST: "skywire.social"
+      PORT: "4000"
+      MIX_ENV: "prod"
+      HF_TOKEN: "${HF_TOKEN}"
+      OPENSEARCH_URL: "http://opensearch:9200"
+      REDIS_URL: "redis://redis:6379"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.20"
+      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
+      MALLOC_ARENA_MAX: "4"
+      
+      # Partitioning: Worker is Partition 1/2
+      JETSTREAM_PARTIES: "2"
+      JETSTREAM_PARTITION: "1"
+    depends_on:
+      - redis
+      - opensearch
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0

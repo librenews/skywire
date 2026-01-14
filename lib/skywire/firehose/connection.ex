@@ -22,7 +22,11 @@ defmodule Skywire.Firehose.Connection do
     # Jetstream cursor param is `?cursor=...` (unix microsecond timestamp)
     
     cursor = CursorStore.get_cursor()
-    url = build_url(cursor)
+    # Support for partitioned streams
+    partition_index = System.get_env("JETSTREAM_PARTITION")
+    partition_count = System.get_env("JETSTREAM_PARTIES")
+    
+    url = build_url(cursor, partition_index, partition_count)
     
     Logger.info("Connecting to Bluesky Jetstream: #{url}")
     
@@ -67,6 +71,12 @@ defmodule Skywire.Firehose.Connection do
   end
 
   ## Private Functions
+
+  defp build_url(cursor, index, count) when is_binary(index) and is_binary(count) do
+    base = build_url(cursor)
+    "#{base}&partitions=#{count}&partition=#{index}"
+  end
+  defp build_url(cursor, _, _), do: build_url(cursor)
 
   defp build_url(cursor) when is_integer(cursor) and cursor > 0 do
     "#{@jetstream_url}&cursor=#{cursor}"
