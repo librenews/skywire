@@ -32,10 +32,13 @@ services:
       # ML Stability: Prevent XLA from spawning too many threads (avoids deadlocks)
       XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       
-      # ML Memory: Limit XLA to 40% of system RAM (avoid aggressive pre-allocation)
-      # and use 'platform' allocator (malloc) to be friendlier to the OS.
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.40"
+      # ML Memory: Limit XLA to 10% of system RAM.
+      # The model is small (~100MB). 10% of 4GB = 400MB, which is plenty.
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
+      
+      # GLIBC Fragmentation Fix (Critical for preventing "leaks" in Docker)
+      MALLOC_ARENA_MAX: "2"
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0
