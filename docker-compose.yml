@@ -47,7 +47,7 @@ services:
     volumes:
       - opensearch_data:/usr/share/opensearch/data
     ports:
-      - "9200:9200"
+      - "127.0.0.1:9200:9200"
 
   redis:
     image: redis:7-alpine

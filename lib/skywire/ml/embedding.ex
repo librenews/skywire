@@ -86,13 +86,33 @@ defmodule Skywire.ML.Embedding do
   """
   def generate_batch(texts, type \\ :ingest) when is_list(texts) do
     serving = serving_name(type)
-    results = Nx.Serving.batched_run(serving, texts)
     
-    # Results is a list of maps: [%{embedding: tensor}, ...]
-    results
-    |> Enum.map(fn %{embedding: tensor} ->
-      Nx.to_flat_list(tensor)
+    # Add a timeout to prevent indefinite hangs (e.g. if EXLA deadlocks)
+    # 60s should be plenty for a batch of 25-100 items.
+    # Note: batched_run takes (serving, batch/input) - it doesn't accept options directly in v0.6?
+    # Actually wait, Nx.Serving.batched_run(serving, batch) is the signature.
+    # There is no timeout option in batched_run/2.
+    # It relies on GenServer.call default timeout (5000ms) but Nx.Serving might override it.
+    
+    # Wait, if it hangs properly, it means it's STUCK inside the serving process computation.
+    # Using Task.await with timeout is a way to force it.
+    
+    task = Task.async(fn -> 
+      Nx.Serving.batched_run(serving, texts)
     end)
+    
+    case Task.yield(task, 60_000) || Task.shutdown(task, :brutal_kill) do
+      {:ok, results} ->
+        # Results is a list of maps: [%{embedding: tensor}, ...]
+        results
+        |> Enum.map(fn %{embedding: tensor} ->
+          Nx.to_flat_list(tensor)
+        end)
+        
+      nil ->
+        Logger.error("Embedding generation timed out (60s). Killing process.")
+        raise "Embedding generation timeout"
+    end
   end
   
   defp serving_name(:api), do: Skywire.EmbeddingServing.API
