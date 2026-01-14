@@ -1,47 +1,23 @@
 defmodule SkywireWeb.EmbeddingController do
   use SkywireWeb, :controller
   import Ecto.Query
-  import Pgvector.Ecto.Query
-  alias Skywire.{Repo, Firehose.Event, ML.Embedding}
+  # import Pgvector.Ecto.Query # REMOVED: Dependency gone
+  alias Skywire.{Repo, Firehose.Event, ML.Cloudflare}
 
   def generate(conn, %{"text" => text}) do
-    # Generate embedding using our serving process
-    case Embedding.generate(text) do
-      nil -> 
-        conn |> put_status(400) |> json(%{error: "Failed to generate embedding"})
-      vector ->
+    # Generate embedding using Cloudflare API
+    case Cloudflare.generate_batch([text]) do
+      [vector] when is_list(vector) -> 
         json(conn, %{embedding: vector})
+      _ -> 
+        conn |> put_status(400) |> json(%{error: "Failed to generate embedding"})
     end
   end
 
-  def search(conn, %{"query" => query} = params) do
-    limit = Map.get(params, "limit", 10)
-    limit = if is_binary(limit), do: String.to_integer(limit), else: limit
-    
-    # 1. Generate embedding for query string using dedicated API serving
-    case Embedding.generate(query, :api) do
-      nil ->
-        conn |> put_status(400) |> json(%{error: "Failed to generate query embedding"})
-      
-      vector ->
-        # 2. Search DB using Pgvector L2 distance (or cosine distance if normalized)
-        # embedding = Pgvector.new(vector) <--- INCORRECT for Ecto query, pass list directly
-        
-        results = 
-          from(e in Event,
-            # Ensure we only search posts
-            where: e.collection == "app.bsky.feed.post",
-            # L2 distance is standard for unnormalized vectors, but cosine distance (<=>) is better for semantic similarity
-            # Bumblebee/MiniLM often produce normalized vectors, let's stick to L2 or Cosine.
-            # L2 (<->) is good. Cosine is (<=>).
-            # Indices usually support L2. We created index with vector_l2_ops.
-            order_by: l2_distance(e.embedding, ^vector),
-            limit: ^limit,
-            select: map(e, [:seq, :repo, :record, :indexed_at, :collection])
-          )
-          |> Repo.all()
-          
-        json(conn, %{results: results})
-    end
+  def search(conn, %{"query" => _query} = _params) do
+    # Legacy SQL Search endpoint - Disabled in NoSQL Mode
+    conn 
+    |> put_status(501) 
+    |> json(%{error: "Not Implemented. Use OpenSearch endpoint."})
   end
 end
