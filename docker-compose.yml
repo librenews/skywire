@@ -37,7 +37,7 @@ services:
       XLA_PYTHON_CLIENT_MEM_FRACTION: "0.20"
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
       # Prevent Thrashing: Each container gets 4 threads (Total 8 cores)
-      XLA_FLAGS: --xla_cpu_intra_op_parallelism_threads=4 --xla_cpu_multi_thread_eigen=true
+      # XLA_FLAGS: --xla_cpu_intra_op_parallelism_threads=4 --xla_cpu_multi_thread_eigen=true
       MALLOC_ARENA_MAX: "4"
       
       # Partitioning: Main App is Partition 0/2
@@ -58,7 +58,7 @@ services:
       XLA_PYTHON_CLIENT_MEM_FRACTION: "0.20"
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
       # Prevent Thrashing: Each container gets 4 threads (Total 8 cores)
-      XLA_FLAGS: --xla_cpu_intra_op_parallelism_threads=4 --xla_cpu_multi_thread_eigen=true
+      # XLA_FLAGS: --xla_cpu_intra_op_parallelism_threads=4 --xla_cpu_multi_thread_eigen=true
       MALLOC_ARENA_MAX: "4"
       
       # Partitioning: Worker is Partition 1/2
