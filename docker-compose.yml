@@ -31,6 +31,11 @@ services:
       
       # ML Stability: Prevent XLA from spawning too many threads (avoids deadlocks)
       XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
+      
+      # ML Memory: Limit XLA to 40% of system RAM (avoid aggressive pre-allocation)
+      # and use 'platform' allocator (malloc) to be friendlier to the OS.
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.40"
+      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0
@@ -38,7 +43,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
       - "plugins.security.disabled=true"
     ulimits:
       memlock:

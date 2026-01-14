@@ -109,7 +109,9 @@ defmodule Skywire.Firehose.Processor do
     Logger.info("Indexing to OpenSearch...")
     case Skywire.Search.OpenSearch.bulk_index(events_with_embeddings) do
       {:ok, _resp} ->
-         Logger.info("Indexed #{length(events)} events to OpenSearch")
+         # Calculate Lag
+         avg_lag_sec = calculate_lag(events)
+         Logger.info("Indexed #{length(events)} events to OpenSearch (Lag: #{avg_lag_sec}s)")
          
          # 3. Update Cursor
          max_seq = Enum.max_by(events, & &1.seq).seq
@@ -175,6 +177,36 @@ defmodule Skywire.Firehose.Processor do
   defp get_text(event) do
     record = Map.get(event, :record) || Map.get(event, "record") || %{}
     Map.get(record, "text")
+  end
+
+  defp calculate_lag([]), do: 0.0
+  defp calculate_lag(events) do
+    now = DateTime.utc_now()
+    
+    # Take the latest event time to see how far behind "real-time" we are
+    # Event "time" is usually microseconds or ISO string? 
+    # Let's inspect get_time in a bit, but assuming we can parse it.
+    
+    # Actually, let's just use the first event in the reversed list (which is the newest)
+    latest_event = hd(events)
+    event_time = get_event_time(latest_event)
+    
+    if event_time do
+      DateTime.diff(now, event_time, :millisecond) / 1000.0
+    else
+      0.0
+    end
+  end
+
+  defp get_event_time(event) do
+    # "time" field from Firehose is usually integer microseconds
+    # e.g. %{time: 1700000000000000}
+    time_us = Map.get(event, :time) || Map.get(event, "time")
+    
+    case time_us do
+      us when is_integer(us) -> DateTime.from_unix(us, :microsecond) |> elem(1)
+      _ -> DateTime.utc_now() # Fallback
+    end
   end
 
   defp broadcast_to_previews(events_with_embeddings) do
