@@ -7,7 +7,7 @@ defmodule Skywire.Subscriptions.Subscription do
   schema "subscriptions" do
     field :external_id, :string
     field :query, :string
-    field :embedding, Pgvector.Ecto.Vector
+    field :embedding, {:array, :float}
     field :threshold, :float, default: 0.8
     # field :callback_url, :string # Deprecated
     field :keywords, {:array, :string}
