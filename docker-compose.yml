@@ -33,13 +33,14 @@ services:
       # This allows EXLA to use all 4 CPUs to speed up generation.
       # XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       
-      # ML Memory: Limit XLA to 10% of system RAM.
-      # The model is small (~100MB). 10% of 4GB = 400MB, which is plenty.
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
+      # ML Memory: Limit XLA to 20% of system RAM (approx 3.2GB on 16GB node).
+      # This gives plenty of room for large batches.
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.20"
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
       
-      # GLIBC Fragmentation Fix (Critical for preventing "leaks" in Docker)
-      MALLOC_ARENA_MAX: "2"
+      # GLIBC Fragmentation Fix
+      # 8 Cores needed? Bump to 4 concurrent arenas to avoid locking.
+      MALLOC_ARENA_MAX: "4"
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0
