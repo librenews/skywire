@@ -199,13 +199,17 @@ defmodule Skywire.Firehose.Processor do
   end
 
   defp get_event_time(event) do
-    # "time" field from Firehose is usually integer microseconds
-    # e.g. %{time: 1700000000000000}
-    time_us = Map.get(event, :time) || Map.get(event, "time")
+    # In our Connection.ex, we map Jetstream 'time_us' to the :seq field.
+    # So :seq IS the timestamp in microseconds.
     
-    case time_us do
+    seq = Map.get(event, :seq) || Map.get(event, "seq")
+    
+    case seq do
       us when is_integer(us) -> DateTime.from_unix(us, :microsecond) |> elem(1)
-      _ -> DateTime.utc_now() # Fallback
+      # Fallback to :time if seq isn't a timestamp (legacy?)
+      _ -> 
+         time_us = Map.get(event, :time) || Map.get(event, "time")
+         if is_integer(time_us), do: DateTime.from_unix(time_us, :microsecond) |> elem(1), else: nil
     end
   end
 
