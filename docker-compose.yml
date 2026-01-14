@@ -29,8 +29,9 @@ services:
       PORT: "4000"
       MIX_ENV: "prod"
       
-      # ML Stability: Prevent XLA from spawning too many threads (avoids deadlocks)
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
+      # ML Stability: We are enabling multi-threading now that memory and timeouts are safe.
+      # This allows EXLA to use all 4 CPUs to speed up generation.
+      # XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       
       # ML Memory: Limit XLA to 10% of system RAM.
       # The model is small (~100MB). 10% of 4GB = 400MB, which is plenty.
