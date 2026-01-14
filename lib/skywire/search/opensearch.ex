@@ -18,6 +18,18 @@ defmodule Skywire.Search.OpenSearch do
   @percolator_index "skywire_subs"
 
   @doc """
+  Checks if OpenSearch is up and reachable.
+  """
+  def health_check do
+    case Req.get("#{base_url()}/_cluster/health", receive_timeout: 2000) do
+      {:ok, %{status: 200}} -> :ok
+      _ -> :error
+    end
+  rescue
+    _ -> :error
+  end
+
+  @doc """
   Setup indices for both Data (firehose) and Queries (percolator).
   """
   def setup do

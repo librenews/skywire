@@ -7,11 +7,11 @@ defmodule Skywire.Application do
 
   @impl true
   def start(_type, _args) do
-    # Ensure OpenSearch index exists
-    Task.start(fn -> 
-      Process.sleep(5000) # Wait a bit for OS to boot if running concurrently
-      Skywire.Search.OpenSearch.setup() 
-    end)
+    # Block startup until OpenSearch is ready
+    wait_for_opensearch()
+    
+    # Initialize indices (safe now)
+    Skywire.Search.OpenSearch.setup()
     
     children = [
       SkywireWeb.Telemetry,
@@ -52,5 +52,24 @@ defmodule Skywire.Application do
   def config_change(changed, _new, removed) do
     SkywireWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+  
+  defp wait_for_opensearch(attempts \\ 1) do
+    require Logger
+    max_retries = 30
+    
+    if attempts > max_retries do
+       Logger.error("OpenSearch failed to come up after 60 seconds. Continuing anyway, but crash is likely.")
+    else
+       case Skywire.Search.OpenSearch.health_check() do
+         :ok -> 
+           Logger.info("OpenSearch is ready.")
+           :ok
+         _ ->
+           Logger.info("Waiting for OpenSearch... (Attempt #{attempts}/#{max_retries})")
+           Process.sleep(2000)
+           wait_for_opensearch(attempts + 1)
+       end
+    end
   end
 end
