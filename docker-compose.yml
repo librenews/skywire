@@ -28,6 +28,9 @@ services:
       # Runtime
       PORT: "4000"
       MIX_ENV: "prod"
+      
+      # ML Stability: Prevent XLA from spawning too many threads (avoids deadlocks)
+      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0
