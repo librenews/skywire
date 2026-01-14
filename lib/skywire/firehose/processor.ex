@@ -99,16 +99,14 @@ defmodule Skywire.Firehose.Processor do
       |> Enum.reverse()
       |> Enum.map(fn e -> Map.put(e, :indexed_at, now) end)
 
-    Logger.info("Flushing buffer with #{length(events)} events")
-    
     # 1. Analyze texts & Generate Embeddings
     # We do this FIRST so we can index the complete document
-    Logger.debug("Generating embeddings...")
+    Logger.info("Generating embeddings for #{length(events)} events...")
     events_with_embeddings = generate_embeddings_for_batch(events)
-    Logger.debug("Embeddings generated.")
+    Logger.info("Embeddings generated.")
     
     # 2. Index to OpenSearch
-    Logger.debug("Indexing to OpenSearch...")
+    Logger.info("Indexing to OpenSearch...")
     case Skywire.Search.OpenSearch.bulk_index(events_with_embeddings) do
       {:ok, _resp} ->
          Logger.info("Indexed #{length(events)} events to OpenSearch")
