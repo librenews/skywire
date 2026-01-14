@@ -21,8 +21,8 @@ defmodule Skywire.Application do
       # Start the Finch HTTP client for sending emails
       {Finch, name: Skywire.Finch},
       
-      # ML / Embeddings (Must start before Processor so it's ready)
-      Skywire.ML.Embedding,
+      # ML / Embeddings (Removed local Bumblebee stack)
+      # Skywire.ML.Embedding,
 
       # Redis Client
       Skywire.Redis,

@@ -149,12 +149,23 @@ defmodule Skywire.Firehose.Processor do
       # Generate batch embeddings
       # Note: If batch size is 100, this might be slightly large for one call?
       # Nx.Serving handles batching internally, so it's fine.
-      embeddings = Skywire.ML.Embedding.generate_batch(texts, :ingest)
+      
+      # Attempt to generate embeddings via Cloudflare Workers AI
+      # If creds are missing or API fails, this returns nil (Keyword-Only Mode fallback).
+      embeddings = Skywire.ML.Cloudflare.generate_batch(texts)
       
       # Create a map of index -> embedding
+      # If embeddings is nil, we map everything to nil.
+      # If embeddings is a list, we zip it.
       embedding_map = 
-        Enum.zip(texts_and_indices, embeddings)
-        |> Map.new(fn {{_, idx}, emb} -> {idx, emb} end)
+        if is_list(embeddings) and length(embeddings) == length(texts) do
+          Enum.zip(texts_and_indices, embeddings)
+          |> Map.new(fn {{_, idx}, emb} -> {idx, emb} end)
+        else
+          # Fallback to nil (Keyword Only)
+          texts_and_indices
+          |> Map.new(fn {_, idx} -> {idx, nil} end)
+        end
         
       # Merge back
       events
@@ -168,14 +179,8 @@ defmodule Skywire.Firehose.Processor do
   defp has_valid_text?(event) do
     collection = Map.get(event, :collection) || Map.get(event, "collection")
     if collection == "app.bsky.feed.post" do
-      record = Map.get(event, :record) || Map.get(event, "record") || %{}
-      text = Map.get(record, "text")
-      langs = Map.get(record, "langs") || []
-      
-      # Filter: Must be English (or unknown lang) AND > 10 chars
-      is_english = Enum.empty?(langs) or "en" in langs
-      
-      text && String.length(text) > 10 && is_english
+      text = get_text(event)
+      text && String.length(text) > 10 # Only embed posts with some substance
     else
       false
     end

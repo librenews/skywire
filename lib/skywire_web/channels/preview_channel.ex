@@ -1,6 +1,6 @@
 defmodule SkywireWeb.PreviewChannel do
   use SkywireWeb, :channel
-  alias Skywire.ML.Embedding
+  alias Skywire.ML.Cloudflare
   require Logger
 
   @common_pubsub_topic "firehose"
@@ -22,7 +22,10 @@ defmodule SkywireWeb.PreviewChannel do
       # Generate embedding if query provided
       query_vec = 
         if query && query != "" do
-          Embedding.generate(query, :api)
+          case Cloudflare.generate_batch([query]) do
+            [emb] when is_list(emb) -> emb
+            _ -> nil
+          end
         else
           nil
         end

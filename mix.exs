@@ -52,9 +52,9 @@ defmodule Skywire.MixProject do
       {:hackney, "~> 1.18"},
       
       # ML & Vector Search
-      {:bumblebee, "~> 0.5.3"},
-      {:exla, "~> 0.7.1"},
-      {:pgvector, "~> 0.3.0"},
+      # {:bumblebee, "~> 0.5.3"},  # Disabled for Lightweight Mode
+      # {:exla, "~> 0.7.1"},       # Disabled for Lightweight Mode
+      # {:pgvector, "~> 0.3.0"},   # Disabled for Lightweight Mode
       {:req, "~> 0.5.0"},
       {:redix, ">= 0.0.0"}
     ]

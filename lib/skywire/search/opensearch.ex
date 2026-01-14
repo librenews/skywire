@@ -121,9 +121,11 @@ defmodule Skywire.Search.OpenSearch do
           text: event.record["text"],
           author: event.repo,
           indexed_at: event.indexed_at,
-          raw_record: event.record,
-          embedding: embedding
+          raw_record: event.record
         }
+        
+        # Only add embedding if present (Keyword-Only Mode support)
+        doc = if embedding, do: Map.put(doc, :embedding, embedding), else: doc
 
         [Jason.encode!(meta), Jason.encode!(doc)]
       end)

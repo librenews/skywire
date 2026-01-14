@@ -2,7 +2,7 @@ defmodule SkywireWeb.SubscriptionController do
   use SkywireWeb, :controller
 
   alias Skywire.Subscriptions
-  alias Skywire.ML.Embedding
+  alias Skywire.ML.Cloudflare
 
   action_fallback SkywireWeb.FallbackController
 
@@ -14,7 +14,10 @@ defmodule SkywireWeb.SubscriptionController do
     
     vector_result = 
       if query && query != "" do
-        Embedding.generate(query, :api)
+        case Cloudflare.generate_batch([query]) do
+          [emb] when is_list(emb) -> emb
+          _ -> nil
+        end
       else
         nil
       end

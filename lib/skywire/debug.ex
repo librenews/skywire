@@ -66,7 +66,11 @@ defmodule Skywire.Debug do
     }
   end
   def check_vector_magnitude do
-    vec = Skywire.ML.Embedding.generate("test string", :api)
+    vec = 
+      case Skywire.ML.Cloudflare.generate_batch(["test string"]) do
+        [emb] when is_list(emb) -> emb
+        _ -> nil
+      end
     
     if vec do
       sum_sq = Enum.reduce(vec, 0, fn x, acc -> acc + x*x end)

@@ -20,13 +20,17 @@ services:
       EVENT_RETENTION_DAYS: ${EVENT_RETENTION_DAYS:-7}
       PORT: "4000"
       MIX_ENV: "prod"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10" # Reduced to fit 8 workers
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
       XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       MALLOC_ARENA_MAX: "2"
       
-      # Partitioning: Main App is Partition 0/8
-      JETSTREAM_PARTIES: "8"
+      # Cloudflare Workers AI Credentials
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      
+      # Partitioning: Main App is Partition 0/2
+      JETSTREAM_PARTIES: "2"
       JETSTREAM_PARTITION: "0"
 
   app-worker:
@@ -44,7 +48,12 @@ services:
       XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
       XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
+      
+      # Cloudflare Workers AI Credentials
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      
+      JETSTREAM_PARTIES: "2"
       JETSTREAM_PARTITION: "1"
     depends_on:
       - redis
@@ -52,151 +61,14 @@ services:
     ports:
       - "4001:4000"
 
-  app-worker-2:
-    build: .
-    restart: always
-    environment:
-      PHX_HOST: "skywire.social"
-      PORT: "4000"
-      MIX_ENV: "prod"
-      HF_TOKEN: "${HF_TOKEN}"
-      OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
-      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
-      MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
-      JETSTREAM_PARTITION: "2"
-    depends_on:
-      - redis
-      - opensearch
-    ports:
-      - "4002:4000"
-
-  app-worker-3:
-    build: .
-    restart: always
-    environment:
-      PHX_HOST: "skywire.social"
-      PORT: "4000"
-      MIX_ENV: "prod"
-      HF_TOKEN: "${HF_TOKEN}"
-      OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
-      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
-      MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
-      JETSTREAM_PARTITION: "3"
-    depends_on:
-      - redis
-      - opensearch
-    ports:
-      - "4003:4000"
-
-  app-worker-4:
-    build: .
-    restart: always
-    environment:
-      PHX_HOST: "skywire.social"
-      PORT: "4000"
-      MIX_ENV: "prod"
-      HF_TOKEN: "${HF_TOKEN}"
-      OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
-      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
-      MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
-      JETSTREAM_PARTITION: "4"
-    depends_on:
-      - redis
-      - opensearch
-    ports:
-      - "4004:4000"
-
-  app-worker-5:
-    build: .
-    restart: always
-    environment:
-      PHX_HOST: "skywire.social"
-      PORT: "4000"
-      MIX_ENV: "prod"
-      HF_TOKEN: "${HF_TOKEN}"
-      OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
-      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
-      MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
-      JETSTREAM_PARTITION: "5"
-    depends_on:
-      - redis
-      - opensearch
-    ports:
-      - "4005:4000"
-
-  app-worker-6:
-    build: .
-    restart: always
-    environment:
-      PHX_HOST: "skywire.social"
-      PORT: "4000"
-      MIX_ENV: "prod"
-      HF_TOKEN: "${HF_TOKEN}"
-      OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
-      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
-      MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
-      JETSTREAM_PARTITION: "6"
-    depends_on:
-      - redis
-      - opensearch
-    ports:
-      - "4006:4000"
-
-  app-worker-7:
-    build: .
-    restart: always
-    environment:
-      PHX_HOST: "skywire.social"
-      PORT: "4000"
-      MIX_ENV: "prod"
-      HF_TOKEN: "${HF_TOKEN}"
-      OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
-      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
-      MALLOC_ARENA_MAX: "2"
-      JETSTREAM_PARTIES: "8"
-      JETSTREAM_PARTITION: "7"
-    depends_on:
-      - redis
-      - opensearch
-    ports:
-      - "4007:4000"
-
   opensearch:
     image: opensearchproject/opensearch:2.11.0
     container_name: skywire_opensearch
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" 
+      # Reverted heap to 512MB for cheaper servers, keyword search is cheap.
       - "plugins.security.disabled=true"
     ulimits:
       memlock:
