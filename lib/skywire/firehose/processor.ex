@@ -16,7 +16,7 @@ defmodule Skywire.Firehose.Processor do
   require Logger
   alias Skywire.Firehose.CursorStore
 
-  @batch_size 50
+  @batch_size 64
   @flush_interval_ms 100
   @max_buffer_size 2000
 
