@@ -54,6 +54,22 @@ Modify criteria for an existing subscription.
   ```
 - **Response** (`200 OK`): Matches the Create response.
 
+### Get Subscription
+Fetch status of a subscription.
+
+- **Endpoint**: `GET /api/subscriptions/:id`
+  - *:id* matches the `external_id`.
+- **Response** (`200 OK`):
+  ```json
+  {
+    "id": "...",
+    "external_id": "rails-db-id-123", 
+    "threshold": 0.8,
+    "status": "active"
+  }
+  ```
+- **Response** (`404 Not Found`): If not exists.
+
 ### Delete Subscription
 Stop receiving events for a specific alert.
 

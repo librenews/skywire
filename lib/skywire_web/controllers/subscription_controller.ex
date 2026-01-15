@@ -54,6 +54,22 @@ defmodule SkywireWeb.SubscriptionController do
     end
   end
 
+  def show(conn, %{"id" => external_id}) do
+    case Subscriptions.get_subscription_by_external_id(external_id) do
+      %Skywire.Subscriptions.Subscription{} = subscription ->
+        json(conn, %{
+          id: subscription.id, # Note: this is actually null if not stored in Postgres, but we don't care.
+          external_id: subscription.external_id,
+          threshold: subscription.threshold,
+          status: "active"
+        })
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Subscription not found"})
+    end
+  end
+
   def delete(conn, %{"id" => external_id}) do
     case Subscriptions.delete_subscription_by_external_id(external_id) do
       {:ok, _sub} ->
