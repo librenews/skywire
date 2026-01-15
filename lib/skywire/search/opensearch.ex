@@ -147,11 +147,18 @@ defmodule Skywire.Search.OpenSearch do
     # _bulk expects a final newline
     body = body <> "\n"
 
-    Req.post("#{base_url()}/_bulk", 
+    case Req.post("#{base_url()}/_bulk", 
       body: body, 
       headers: [{"content-type", "application/x-ndjson"}],
       receive_timeout: 60_000
-    )
+    ) do
+      {:ok, %{status: 200} = resp} -> {:ok, resp}
+      {:ok, %{status: 429, body: body}} -> 
+        Logger.error("OpenSearch Circuit Breaker (429) during Bulk Index: #{inspect(body["error"]["reason"])}")
+        {:error, :circuit_breaker}
+      {:ok, %{status: status, body: body}} -> {:error, "Status #{status}: #{inspect(body)}"}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   @doc """
@@ -206,6 +213,14 @@ defmodule Skywire.Search.OpenSearch do
            {event, hits}
         end)
       
+      {:ok, %{status: 429, body: body}} ->
+        Logger.warning("OpenSearch Circuit Breaker (429): #{inspect(body["error"]["reason"])}")
+        []
+
+      {:ok, %{status: status, body: body}} ->
+        Logger.error("Percolate failed with status #{status}: #{inspect(body)}")
+        []
+
       {:error, reason} -> 
         Logger.error("Percolate error: #{inspect(reason)}")
         []

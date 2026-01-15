@@ -122,6 +122,11 @@ defmodule Skywire.Firehose.Processor do
          Skywire.Matcher.check_matches(events_with_embeddings)
          broadcast_to_previews(events_with_embeddings)
          
+      {:error, :circuit_breaker} ->
+         # Pause and die to allow backoff
+         Logger.error("OpenSearch Circuit Breaker tripped. Dropping batch and restarting.")
+         raise "OpenSearch Circuit Breaker (OOM)"
+
       {:error, reason} ->
          Logger.error("Failed to index batch to OpenSearch: #{inspect(reason)}")
          raise "OpenSearch indexing failed: #{inspect(reason)}"

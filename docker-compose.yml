@@ -20,9 +20,6 @@ services:
       EVENT_RETENTION_DAYS: ${EVENT_RETENTION_DAYS:-7}
       PORT: "4000"
       MIX_ENV: "prod"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       MALLOC_ARENA_MAX: "2"
       
       # Cloudflare Workers AI Credentials
@@ -44,9 +41,6 @@ services:
       OPENSEARCH_URL: "http://opensearch:9200"
       REDIS_URL: "redis://redis:6379"
       SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
-      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.10"
-      XLA_PYTHON_CLIENT_ALLOCATOR: "platform"
-      XLA_FLAGS: --xla_cpu_multi_thread_eigen=false
       MALLOC_ARENA_MAX: "2"
       
       # Cloudflare Workers AI Credentials
@@ -67,8 +61,8 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" 
-      # Reverted heap to 512MB for cheaper servers, keyword search is cheap.
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g" 
+      # Scaled up for 16GB server.
       - "plugins.security.disabled=true"
     ulimits:
       memlock:
