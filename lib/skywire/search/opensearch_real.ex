@@ -6,7 +6,7 @@ defmodule Skywire.Search.OpenSearch.Real do
   require Logger
 
   @index_name "firehose_events"
-  @dimensions 384 # MiniLM-L6-v2
+  @dimensions 1024 # bge-large-en-v1.5
 
   defp base_url do
     System.get_env("OPENSEARCH_URL") || "http://localhost:9200"

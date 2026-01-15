@@ -34,7 +34,7 @@ services:
     build: .
     restart: always
     environment:
-      PHX_HOST: "skywire.social"
+      PHX_HOST: "${PHX_HOST:-localhost}"
       PORT: "4000"
       MIX_ENV: "prod"
       HF_TOKEN: "${HF_TOKEN}"

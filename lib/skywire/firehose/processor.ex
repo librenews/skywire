@@ -134,45 +134,46 @@ defmodule Skywire.Firehose.Processor do
   end
 
   defp generate_embeddings_for_batch(events) do
-    # Filter for valid text
-    # We want to keep ALL events for the index (even without text/embedding), 
-    # but only generate embeddings for those with text.
-    
-    # Extract texts where available
-    texts_and_indices = 
+    # 1. Filter events that have valid text AND are in a supported language (currently only "en")
+    valid_events_with_indices = 
       events
       |> Enum.with_index()
-      |> Enum.filter(fn {event, _idx} -> has_valid_text?(event) end)
-      
-    if texts_and_indices == [] do
-      # No text to embed, return events with nil embeddings
+      |> Enum.filter(fn {event, _idx} -> has_valid_text_and_language?(event) end)
+
+    if valid_events_with_indices == [] do
       Enum.map(events, &{&1, nil})
     else
-      texts = Enum.map(texts_and_indices, fn {event, _} -> get_text(event) end)
-      Logger.info("Generating embeddings for #{length(texts)} (out of #{length(events)}) events...")
+      # 2. Group by language to choose the right model
+      # Currently we only support "en", but this structure supports expansion.
+      # Since we already filtered for supported languages, we can just group.
       
-      # Generate batch embeddings
-      # Note: If batch size is 100, this might be slightly large for one call?
-      # Nx.Serving handles batching internally, so it's fine.
-      
-      # Attempt to generate embeddings via Cloudflare Workers AI
-      # If creds are missing or API fails, this returns nil (Keyword-Only Mode fallback).
-      embeddings = Skywire.ML.Cloudflare.generate_batch(texts)
-      
-      # Create a map of index -> embedding
-      # If embeddings is nil, we map everything to nil.
-      # If embeddings is a list, we zip it.
+      grouped_by_lang = 
+        valid_events_with_indices
+        |> Enum.group_by(fn {event, _} -> get_primary_language(event) end)
+
+      # 3. Generate embeddings for each language group
+      # We accumulate all results into a single map of {index => embedding}
       embedding_map = 
-        if is_list(embeddings) and length(embeddings) == length(texts) do
-          Enum.zip(texts_and_indices, embeddings)
-          |> Map.new(fn {{_, idx}, emb} -> {idx, emb} end)
-        else
-          # Fallback to nil (Keyword Only)
-          texts_and_indices
-          |> Map.new(fn {_, idx} -> {idx, nil} end)
-        end
-        
-      # Merge back
+        Enum.reduce(grouped_by_lang, %{}, fn {lang, group}, acc ->
+          texts = Enum.map(group, fn {event, _} -> get_text(event) end)
+          model = Skywire.ML.Cloudflare.Real.get_model_for_language(lang)
+          
+          Logger.info("Generating embeddings for #{length(texts)} events (Language: #{lang}, Model: #{model})...")
+          
+          case Skywire.ML.Cloudflare.generate_batch(texts, model) do
+            nil -> acc # Failed or skipped
+            embeddings when is_list(embeddings) ->
+              # Map local group indices to embeddings
+              group
+              |> Enum.zip(embeddings)
+              |> Enum.reduce(acc, fn {{_event, original_idx}, emb}, map_acc ->
+                Map.put(map_acc, original_idx, emb)
+              end)
+            _ -> acc
+          end
+        end)
+
+      # 4. Merge results back into original event list
       events
       |> Enum.with_index()
       |> Enum.map(fn {event, idx} -> 
@@ -181,11 +182,19 @@ defmodule Skywire.Firehose.Processor do
     end
   end
 
-  defp has_valid_text?(event) do
+  defp has_valid_text_and_language?(event) do
     collection = Map.get(event, :collection) || Map.get(event, "collection")
+    
     if collection == "app.bsky.feed.post" do
       text = get_text(event)
-      text && String.length(text) > 10 # Only embed posts with some substance
+      langs = get_langs(event)
+      
+      # Check if text is substantial AND language is English
+      # If 'langs' is empty/nil, we might default to false or true? 
+      # Bluesky usually populates it. Let's be strict: must include "en".
+      is_english = langs && "en" in langs
+      
+      text && String.length(text) > 10 && is_english
     else
       false
     end
@@ -194,6 +203,17 @@ defmodule Skywire.Firehose.Processor do
   defp get_text(event) do
     record = Map.get(event, :record) || Map.get(event, "record") || %{}
     Map.get(record, "text")
+  end
+  
+  defp get_langs(event) do
+    record = Map.get(event, :record) || Map.get(event, "record") || %{}
+    Map.get(record, "langs") # Returns list of strings e.g. ["en"]
+  end
+  
+  defp get_primary_language(_event) do
+    # For now, just take "en" if present, or the first one.
+    # Since we filtered `has_valid_text_and_language?`, we know "en" is in there.
+    "en"
   end
 
   defp calculate_lag([]), do: 0.0

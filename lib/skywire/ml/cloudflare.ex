@@ -6,10 +6,10 @@ defmodule Skywire.ML.Cloudflare do
   In Prod: uses Skywire.ML.Cloudflare.Real.
   """
 
-  @callback generate_batch([String.t()]) :: [list(float())] | nil
+  @callback generate_batch([String.t()], String.t()) :: [list(float())] | nil
 
-  def generate_batch(texts) do
-    impl().generate_batch(texts)
+  def generate_batch(texts, model \\ "@cf/baai/bge-large-en-v1.5") do
+    impl().generate_batch(texts, model)
   end
 
   defp impl do

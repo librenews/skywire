@@ -1,8 +1,9 @@
 const WebSocket = require('ws');
 
 // Connect to the WebSocket endpoint
-// Note: using wss:// since skywire.social handles SSL
-const ws = new WebSocket('wss://skywire.social/socket/websocket?vsn=2.0.0');
+const host = process.env.PHX_HOST || 'localhost:4000';
+const protocol = host.includes('localhost') ? 'ws' : 'wss';
+const ws = new WebSocket(`${protocol}://${host}/socket/websocket?vsn=2.0.0`);
 
 ws.on('open', function open() {
   console.log('Connected to Skywire...');

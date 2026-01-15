@@ -1,7 +1,7 @@
 # Skywire API Reference
 
-**Base URL**: `https://skywire.social`
-**WebSocket URL**: `wss://skywire.social/socket`
+**Base URL**: `https://your-domain.com`
+**WebSocket URL**: `wss://your-domain.com/socket`
 
 This document serves as the integration contract for external applications (e.g., Rails) to consume Skywire's firehose filtration service.
 
@@ -162,7 +162,7 @@ Before creating a subscription, use this channel to show users a live stream of 
 - **Topic**: `preview`
 
 ### Connection
-1.  Connect to `wss://skywire.social/socket`.
+1.  Connect to `wss://your-domain.com/socket`.
 2.  Join channel `preview` with the following params:
     ```json
     {

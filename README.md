@@ -43,7 +43,7 @@ HF_TOKEN=...
 EVENT_RETENTION_DAYS=3
 
 # External Access
-PHX_HOST=skywire.social
+PHX_HOST=your-domain.com
 SECRET_KEY_BASE=...
 ```
 
@@ -72,7 +72,7 @@ Register a new "Alert" for a user.
 Listen to the `skywire:matches` Redis stream. Each message contains the post and the `external_id` it matched.
 
 ### 3. Real-time Preview (WebSocket)
-Connect to `wss://skywire.social/socket` to stream ephemeral previews for UI wizards.
+Connect to `wss://your-domain.com/socket` to stream ephemeral previews for UI wizards.
 
 *See `api.md` for full API documentation.*
 

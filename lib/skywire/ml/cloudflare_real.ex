@@ -7,10 +7,21 @@ defmodule Skywire.ML.Cloudflare.Real do
   """
   require Logger
 
-  @model "@cf/baai/bge-small-en-v1.5"
+  @default_model "@cf/baai/bge-large-en-v1.5"
   @base_url "https://api.cloudflare.com/client/v4/accounts"
 
-  def generate_batch(texts) do
+  # Map languages to specific models if needed.
+  # Currently we only use the English model, but this allows expansion.
+  @language_models %{
+    "en" => "@cf/baai/bge-large-en-v1.5"
+    # "zh" => "@cf/baai/bge-large-zh-v1.5" # Example
+  }
+
+  def get_model_for_language(lang) do
+     Map.get(@language_models, lang, @default_model)
+  end
+
+  def generate_batch(texts, model \\ @default_model) do
     account_id = System.get_env("CLOUDFLARE_ACCOUNT_ID")
     api_token = System.get_env("CLOUDFLARE_API_TOKEN")
 
@@ -18,7 +29,7 @@ defmodule Skywire.ML.Cloudflare.Real do
       Logger.warning("Cloudflare credentials missing. Skipping embeddings.")
       nil
     else
-      url = "#{@base_url}/#{account_id}/ai/run/#{@model}"
+      url = "#{@base_url}/#{account_id}/ai/run/#{model}"
       
       headers = [
         {"Authorization", "Bearer #{api_token}"},

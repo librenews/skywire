@@ -33,8 +33,8 @@ defmodule SkywireWeb.SubscriptionControllerTest do
       conn = authenticate(conn)
       
       # 1. Expect Embedding Generation
-      expect(CloudflareMock, :generate_batch, fn ["artificial intelligence"] ->
-        [[0.1, 0.2]] # Return one embedding
+      expect(CloudflareMock, :generate_batch, fn ["artificial intelligence"], _model ->
+        [[0.1, 0.2, 0.3]] # Return one embedding
       end)
 
       # 2. Expect OpenSearch Indexing
