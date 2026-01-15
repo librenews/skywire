@@ -63,16 +63,17 @@ defmodule Skywire.Firehose.CursorStore do
   ## Private Functions
 
   defp load_cursor_from_redis do
-    case Redis.command(["GET", cursor_key()]) do
-      {:ok, nil} -> 0
-      {:ok, seq_str} -> String.to_integer(seq_str)
-      {:error, reason} ->
-        Logger.error("Failed to load cursor from Redis: #{inspect(reason)}")
-        # If Redis is down regarding persistent state, we should probably crash or retry.
-        # But for now, returning 0 might be dangerous (replaying history).
-        # Better to return 0 if first run, or crash if connection fails.
-        # Assuming crash for safety if connection is truly borked on boot.
-        0 
+    if Application.get_env(:skywire, :load_cursor_on_startup, true) do
+      case Redis.command(["GET", cursor_key()]) do
+        {:ok, nil} -> 0
+        {:ok, seq_str} -> String.to_integer(seq_str)
+        {:error, reason} ->
+          Logger.error("Failed to load cursor from Redis: #{inspect(reason)}")
+          0 
+      end
+    else
+      0
     end
   end
+
 end

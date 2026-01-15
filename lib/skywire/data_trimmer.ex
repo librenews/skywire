@@ -7,8 +7,8 @@ defmodule Skywire.DataTrimmer do
   """
   use GenServer
   require Logger
-  alias Skywire.Repo
-  import Ecto.Query
+  # alias Skywire.Repo
+  # import Ecto.Query
 
   @trim_interval_ms :timer.hours(24)  # Run daily
   @default_retention_days 7
@@ -36,13 +36,10 @@ defmodule Skywire.DataTrimmer do
   end
 
   defp trim_old_events do
-    retention_days = Application.get_env(:skywire, :event_retention_days, @default_retention_days)
-    cutoff = DateTime.utc_now() |> DateTime.add(-retention_days * 24 * 60 * 60, :second)
-
-    {count, _} = 
-      from(e in "firehose_events", where: e.indexed_at < ^cutoff)
-      |> Repo.delete_all()
-
-    Logger.info("Trimmed #{count} events older than #{retention_days} days")
+    # retention_days = Application.get_env(:skywire, :event_retention_days, @default_retention_days)
+    # TODO: Implement deletion from OpenSearch if needed.
+    # For now, OpenSearch index lifecycle management (ILM) is preferred over manual deletion.
+    Logger.info("DataTrimmer: Manual trimming is disabled in favor of ILM.")
+    :ok
   end
 end

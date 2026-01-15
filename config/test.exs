@@ -1,17 +1,20 @@
 import Config
 
-# Configure your database
-#
-# The MIX_TEST_PARTITION environment variable can be used
-# to provide built-in test partitioning in CI environment.
-# Run `mix help test` for more information.
-config :skywire, Skywire.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "skywire_test#{System.get_env("MIX_TEST_PARTITION")}",
-  pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+# Mock Implementations
+config :skywire, :cloudflare_impl, Skywire.ML.CloudflareMock
+config :skywire, :opensearch_impl, Skywire.Search.OpenSearchMock
+config :skywire, :redis_impl, Skywire.RedisMock
+
+# Disable OpenSearch startup usage in Test
+config :skywire, :check_opensearch_on_startup, false
+
+# Disable CursorStore startup usage in Test (prevents RedisMock errors on boot)
+config :skywire, :load_cursor_on_startup, false
+
+# Disable Firehose Connection in Test (prevents real data ingestion)
+config :skywire, :start_firehose, false
+
+
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

@@ -1,28 +1,36 @@
 defmodule Skywire.Redis do
   @moduledoc """
-  Wrapper around Redix for Redis interactions.
+  Behaviour and Proxy for Redis Client.
+  
+  In Test: uses Mock.
+  In Prod: uses Skywire.Redis.Real.
   """
   
-  # Name of the named process
-  @connection_name :skywire_redis
+  @callback command(list(String.t())) :: {:ok, any()} | {:error, any()}
+  @callback pipeline(list(list(String.t()))) :: {:ok, list(any())} | {:error, any()}
 
-  def child_spec(_opts) do
-    redis_url = Application.fetch_env!(:skywire, :redis_url)
+  def command(args), do: impl().command(args)
+  def pipeline(args), do: impl().pipeline(args)
+
+  def child_spec(opts) do
+    module = impl()
     
-    %{
-      id: Redix,
-      start: {Redix, :start_link, [redis_url, [name: @connection_name]]}
-    }
+    if function_exported?(module, :child_spec, 1) do
+      module.child_spec(opts)
+    else
+      # If the implementation (e.g. Mock) doesn't need to be started, 
+      # we return a dummy child spec that starts a temporary Task which immediately finishes with :ignore.
+      # This satisfies the Supervisor that wants to start "Skywire.Redis".
+      %{
+        id: module,
+        start: {Task, :start_link, [fn -> :ignore end]},
+        type: :worker,
+        restart: :temporary
+      }
+    end
   end
 
-  @doc """
-  Executes a command against the global Redis (Skywire) connection.
-  """
-  def command(command) do
-    Redix.command(@connection_name, command)
-  end
-
-  def pipeline(commands) do
-    Redix.pipeline(@connection_name, commands)
+  defp impl do
+    Application.get_env(:skywire, :redis_impl, Skywire.Redis.Real)
   end
 end

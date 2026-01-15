@@ -52,11 +52,11 @@ defmodule Skywire.MixProject do
       {:hackney, "~> 1.18"},
       
       # ML & Vector Search
-      # {:bumblebee, "~> 0.5.3"},  # Disabled for Lightweight Mode
-      # {:exla, "~> 0.7.1"},       # Disabled for Lightweight Mode
-      # {:pgvector, "~> 0.3.0"},   # Disabled for Lightweight Mode
       {:req, "~> 0.5.0"},
-      {:redix, ">= 0.0.0"}
+      {:redix, ">= 0.0.0"},
+      
+      # Testing
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 
@@ -68,10 +68,8 @@ defmodule Skywire.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      setup: ["deps.get"],
+      test: ["test"]
     ]
   end
 end

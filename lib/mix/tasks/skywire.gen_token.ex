@@ -12,8 +12,8 @@ defmodule Mix.Tasks.Skywire.GenToken do
   - Print the token (ONLY TIME IT WILL BE SHOWN)
   """
   use Mix.Task
-  alias Skywire.Repo
-  alias Skywire.Auth.Token
+  # alias Skywire.Repo
+  # alias Skywire.Auth.Token
 
   @shortdoc "Generate a new API token"
 
@@ -25,15 +25,17 @@ defmodule Mix.Tasks.Skywire.GenToken do
     token = generate_token()
     token_hash = hash_token(token)
 
-    # Save to database
-    %Token{}
-    |> Token.changeset(%{
+    # Save to Redis instead of Postgres
+    json_payload = Jason.encode!(%{
       name: name,
-      token_hash: token_hash,
-      scopes: [],
-      active: true
+      active: true,
+      created_at: DateTime.utc_now()
     })
-    |> Repo.insert!()
+    
+    case Skywire.Redis.command(["SET", "api_token:#{token_hash}", json_payload]) do
+       {:ok, "OK"} -> :ok
+       {:error, reason} -> Mix.raise("Failed to save token to Redis: #{inspect(reason)}")
+    end
 
     Mix.shell().info("""
 

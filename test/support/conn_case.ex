@@ -32,7 +32,7 @@ defmodule SkywireWeb.ConnCase do
   end
 
   setup tags do
-    Skywire.DataCase.setup_sandbox(tags)
+    # Skywire.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

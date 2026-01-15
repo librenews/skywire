@@ -1,8 +1,8 @@
 defmodule SkywireWeb.EmbeddingController do
   use SkywireWeb, :controller
-  import Ecto.Query
-  # import Pgvector.Ecto.Query # REMOVED: Dependency gone
-  alias Skywire.{Repo, Firehose.Event, ML.Cloudflare}
+  # import Ecto.Query
+  # alias Skywire.{Repo, Firehose.Event, ML.Cloudflare}
+  alias Skywire.ML.Cloudflare
 
   def generate(conn, %{"text" => text}) do
     # Generate embedding using Cloudflare API

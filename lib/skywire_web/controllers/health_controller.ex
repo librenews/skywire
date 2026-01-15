@@ -1,8 +1,8 @@
 defmodule SkywireWeb.HealthController do
   use SkywireWeb, :controller
   alias Skywire.Firehose.CursorStore
-  alias Skywire.Repo
-  import Ecto.Query
+  # alias Skywire.Repo
+  # import Ecto.Query
 
   def index(conn, _params) do
     cursor = CursorStore.get_cursor()
@@ -19,22 +19,9 @@ defmodule SkywireWeb.HealthController do
   end
 
   defp calculate_lag do
-    query = from e in "firehose_events",
-            select: e.indexed_at,
-            order_by: [desc: e.indexed_at],
-            limit: 1
-
-    case Repo.one(query) do
-      nil -> 0
-      %DateTime{} = indexed_at ->
-        DateTime.diff(DateTime.utc_now(), indexed_at, :second)
-      %NaiveDateTime{} = naive ->
-        # Assume UTC if naive
-        DateTime.diff(DateTime.utc_now(), DateTime.from_naive!(naive, "Etc/UTC"), :second)
-      _ -> 0
-    end
-  rescue
-    _ -> -1 # Return -1 on DB failure so health check doesn't 500
+    # Lag calculation disabled as we moved away from Postgres.
+    # TODO: Implement Redis/OpenSearch lag check.
+    0
   end
 
 end

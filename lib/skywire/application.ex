@@ -7,11 +7,16 @@ defmodule Skywire.Application do
 
   @impl true
   def start(_type, _args) do
-    # Block startup until OpenSearch is ready
-    wait_for_opensearch()
+    # Block startup until OpenSearch is ready (unless waiting is disabled, e.g. test)
+    if Application.get_env(:skywire, :check_opensearch_on_startup, true) do
+      wait_for_opensearch()
+    end
+    
     
     # Initialize indices (safe now)
-    Skywire.Search.OpenSearch.setup()
+    if Application.get_env(:skywire, :check_opensearch_on_startup, true) do
+       Skywire.Search.OpenSearch.setup()
+    end
     
     children = [
       SkywireWeb.Telemetry,
@@ -28,9 +33,15 @@ defmodule Skywire.Application do
       Skywire.Redis,
       
       # Skywire firehose components (order matters!)
-      Skywire.Firehose.CursorStore,
-      Skywire.Firehose.Processor,
-      {Skywire.Firehose.Connection, name: Skywire.Firehose.Connection},
+      Skywire.Firehose.CursorStore
+    ] ++ if Application.get_env(:skywire, :start_firehose, true) do
+      [
+        Skywire.Firehose.Processor,
+        {Skywire.Firehose.Connection, name: Skywire.Firehose.Connection}
+      ]
+    else
+      []
+    end ++ [
       
       # Data retention
       Skywire.DataTrimmer,

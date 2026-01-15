@@ -110,8 +110,8 @@ defmodule SkywireWeb.PreviewChannel do
   defp calculate_similarity(nil, _vec2), do: 0.0
   defp calculate_similarity(_vec1, nil), do: 0.0
   defp calculate_similarity(vec1, vec2) do
-    l1 = if is_struct(vec1, Pgvector), do: Pgvector.to_list(vec1), else: vec1
-    l2 = if is_struct(vec2, Pgvector), do: Pgvector.to_list(vec2), else: vec2
+    l1 = vec1
+    l2 = vec2
 
     dot = 
       Enum.zip(l1, l2)
