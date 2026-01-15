@@ -61,8 +61,8 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g" 
-      # Scaled to 2GB Heap (Safe for 4GB-8GB servers)
+      - "OPENSEARCH_JAVA_OPTS=-Xms8g -Xmx8g" 
+      # Scaled to 8GB Heap (50% of 16GB RAM)
       - "plugins.security.disabled=true"
     ulimits:
       memlock:
