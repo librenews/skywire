@@ -54,7 +54,7 @@ import_config "#{config_env()}.exs"
 config :nx, :default_backend, EXLA.Backend
 
 config :exla, :clients,
-  default: [platform: :cuda],
-  cuda: [platform: :cuda]
+  default: [client: :cuda],
+  cuda: [platform: :cuda, preallocate: false, memory_fraction: 0.4]
 
 config :exla, :preferred_clients, [:cuda]
