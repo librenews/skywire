@@ -56,3 +56,5 @@ config :nx, :default_backend, EXLA.Backend
 config :exla, :clients,
   default: [platform: :cuda],
   cuda: [platform: :cuda]
+
+config :exla, :preferred_clients, [:cuda]
