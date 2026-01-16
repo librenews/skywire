@@ -22,7 +22,7 @@ defmodule Skywire.ML.Local do
     serving =
       Bumblebee.Text.text_embedding(model_info, tokenizer,
         output_attribute: :pooled_state,
-        compile: [batch_size: 32, sequence_length: 512],
+        compile: [batch_size: 64, sequence_length: 256],
         defn_options: [compiler: EXLA, client: :cuda]
       )
 
