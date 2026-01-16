@@ -22,6 +22,7 @@ services:
       MIX_ENV: "prod"
       MALLOC_ARENA_MAX: "2"
       XLA_TARGET: "cuda120"
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.5"
       
       # Cloudflare Workers AI Credentials
       CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
@@ -51,6 +52,7 @@ services:
       SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
       MALLOC_ARENA_MAX: "2"
       XLA_TARGET: "cuda120"
+      XLA_PYTHON_CLIENT_MEM_FRACTION: "0.5"
       
       # Cloudflare Workers AI Credentials
       CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
