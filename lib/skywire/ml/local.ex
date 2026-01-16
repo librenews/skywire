@@ -40,11 +40,15 @@ defmodule Skywire.ML.Local do
     # but we keep arity for compatibility with Cloudflare contract.
     
     try do
-      output = Nx.Serving.batched_run(@serving_name, texts)
-      
-      # Output is %{pooled_state: Tensor}. We need to convert to list of lists.
-      output.pooled_state
-      |> Nx.to_list()
+      output = Nx.Serving.run(@serving_name, texts)
+      # Output is a LIST of maps: [%{encryption: tensor}, ...]
+      # We need to extract the embedding from each and return a list of lists.
+      Enum.map(output, fn result -> 
+        # Bumblebee defaults the output key to :embedding or :pooled_state depending on version?
+        # The error log showed keys: [:embedding]
+        result.embedding 
+        |> Nx.to_flat_list()
+      end)
     rescue
       e -> 
         Logger.error("Local Inference Failed: #{inspect(e)}")
