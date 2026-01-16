@@ -52,3 +52,7 @@ import_config "#{config_env()}.exs"
 
 # Nx / EXLA Configuration
 config :nx, :default_backend, EXLA.Backend
+
+config :exla, :clients,
+  default: [platform: :cuda],
+  cuda: [platform: :cuda]
