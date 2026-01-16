@@ -7,14 +7,14 @@ defmodule Skywire.ML.Cloudflare.Real do
   """
   require Logger
 
-  @default_model "@cf/baai/bge-large-en-v1.5"
+  @default_model "@cf/baai/bge-small-en-v1.5"
   @base_url "https://api.cloudflare.com/client/v4/accounts"
 
   # Map languages to specific models if needed.
   # Currently we only use the English model, but this allows expansion.
   @language_models %{
-    "en" => "@cf/baai/bge-large-en-v1.5"
-    # "zh" => "@cf/baai/bge-large-zh-v1.5" # Example
+    "en" => "@cf/baai/bge-small-en-v1.5"
+    # "zh" => "@cf/baai/bge-small-zh-v1.5" # Example
   }
 
   def get_model_for_language(lang) do

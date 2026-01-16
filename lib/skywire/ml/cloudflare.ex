@@ -8,7 +8,7 @@ defmodule Skywire.ML.Cloudflare do
 
   @callback generate_batch([String.t()], String.t()) :: [list(float())] | nil
 
-  def generate_batch(texts, model \\ "@cf/baai/bge-large-en-v1.5") do
+  def generate_batch(texts, model \\ "@cf/baai/bge-small-en-v1.5") do
     impl().generate_batch(texts, model)
   end
 

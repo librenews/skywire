@@ -13,7 +13,7 @@ services:
     environment:
       HF_TOKEN: ${HF_TOKEN}
       OPENSEARCH_URL: http://opensearch:9200
-      REDIS_URL: redis://redis:6379
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       PHX_HOST: ${PHX_HOST:-localhost}
       PHX_SERVER: "true"
@@ -39,7 +39,7 @@ services:
       MIX_ENV: "prod"
       HF_TOKEN: "${HF_TOKEN}"
       OPENSEARCH_URL: "http://opensearch:9200"
-      REDIS_URL: "redis://redis:6379"
+      REDIS_URL: "redis://:${REDIS_PASSWORD}@redis:6379"
       SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
       MALLOC_ARENA_MAX: "2"
       
@@ -79,8 +79,11 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:

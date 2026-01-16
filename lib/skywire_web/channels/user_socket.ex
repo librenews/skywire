@@ -15,8 +15,13 @@ defmodule SkywireWeb.UserSocket do
 
 
   @impl true
-  def connect(_params, socket, _connect_info) do
-    {:ok, socket}
+  def connect(params, socket, _connect_info) do
+    token = Map.get(params, "token")
+    
+    case Skywire.Auth.verify_token(token) do
+      {:ok, _record} -> {:ok, socket}
+      _ -> :error
+    end
   end
 
   @impl true
