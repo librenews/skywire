@@ -13,7 +13,7 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
-ENV XLA_TARGET="cuda12"
+ENV XLA_TARGET="cuda120"
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
