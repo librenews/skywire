@@ -43,8 +43,8 @@ defmodule Skywire.ML.Local do
     try do
       output = Nx.Serving.batched_run(@serving_name, texts)
       
-      # Output is %{embedding: Tensor}. We need to convert to list of lists.
-      output.embedding
+      # Output is %{pooled_state: Tensor}. We need to convert to list of lists.
+      output.pooled_state
       |> Nx.to_list()
     rescue
       e -> 
