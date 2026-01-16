@@ -26,8 +26,12 @@ defmodule Skywire.Application do
       # Start the Finch HTTP client for sending emails
       {Finch, name: Skywire.Finch},
       
-      # ML / Embeddings (Removed local Bumblebee stack)
-      # Skywire.ML.Embedding,
+      # ML / Embeddings (Local GPU)
+    ] ++ if Application.get_env(:skywire, :start_local_ml, true) do
+      [Skywire.ML.Local]
+    else
+      []
+    end ++ [
 
       # Redis Client
       Skywire.Redis,

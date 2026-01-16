@@ -54,6 +54,9 @@ defmodule Skywire.MixProject do
       # ML & Vector Search
       {:req, "~> 0.5.0"},
       {:redix, ">= 0.0.0"},
+      {:bumblebee, "~> 0.5.3"},
+      {:exla, ">= 0.0.0"},
+      {:nx, "~> 0.7.0"},
       
       # Testing
       {:mox, "~> 1.0", only: :test}

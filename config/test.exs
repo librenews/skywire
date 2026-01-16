@@ -34,3 +34,6 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Disable Local ML startup in Test
+config :skywire, :start_local_ml, false

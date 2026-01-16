@@ -156,11 +156,10 @@ defmodule Skywire.Firehose.Processor do
       embedding_map = 
         Enum.reduce(grouped_by_lang, %{}, fn {lang, group}, acc ->
           texts = Enum.map(group, fn {event, _} -> get_text(event) end)
-          model = Skywire.ML.Cloudflare.Real.get_model_for_language(lang)
+          Logger.info("Generating embeddings for #{length(texts)} events (Language: #{lang})...")
           
-          Logger.info("Generating embeddings for #{length(texts)} events (Language: #{lang}, Model: #{model})...")
-          
-          case Skywire.ML.Cloudflare.generate_batch(texts, model) do
+          # Use Local ML
+          case Skywire.ML.Local.generate_batch(texts) do
             nil -> acc # Failed or skipped
             embeddings when is_list(embeddings) ->
               # Map local group indices to embeddings

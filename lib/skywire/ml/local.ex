@@ -1,0 +1,55 @@
+defmodule Skywire.ML.Local do
+  @moduledoc """
+  Local Inference Server using Bumblebee and EXLA (GPU).
+  Generates text embeddings using BAAE/bge-large-en-v1.5.
+  """
+  use GenServer
+  require Logger
+
+  @serving_name Skywire.ML.Serving
+  @model_repo "BAAI/bge-large-en-v1.5"
+
+  def start_link(_opts) do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  end
+
+  def init(_) do
+    Logger.info("Initializing Local ML (Bumblebee) with model: #{@model_repo}...")
+    
+    {:ok, model_info} = Bumblebee.load_model({:hf, @model_repo})
+    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, @model_repo})
+    
+    serving =
+      Bumblebee.Text.text_embedding(model_info, tokenizer,
+        output_pool: :cls_before_pooler,
+        output_attribute: :embedding,
+        compile: [batch_size: 16, sequence_length: 512],
+        defn_options: [compiler: EXLA]
+      )
+
+    Nx.Serving.start_link(name: @serving_name, serving: serving)
+
+    Logger.info("Local ML Serving started successfully.")
+    {:ok, %{}}
+  end
+
+  @doc """
+  Generates embeddings for a batch of texts.
+  """
+  def generate_batch(texts, _model \\ nil) do
+    # Note: _model arg is ignored as we currently serve one model locally,
+    # but we keep arity for compatibility with Cloudflare contract.
+    
+    try do
+      output = Nx.Serving.batched_run(@serving_name, texts)
+      
+      # Output is %{embedding: Tensor}. We need to convert to list of lists.
+      output.embedding
+      |> Nx.to_list()
+    rescue
+      e -> 
+        Logger.error("Local Inference Failed: #{inspect(e)}")
+        nil
+    end
+  end
+end

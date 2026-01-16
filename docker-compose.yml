@@ -29,6 +29,13 @@ services:
       # Partitioning: Main App is Partition 0/2
       JETSTREAM_PARTIES: "2"
       JETSTREAM_PARTITION: "0"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   app-worker:
     build: .
@@ -49,6 +56,13 @@ services:
       
       JETSTREAM_PARTIES: "2"
       JETSTREAM_PARTITION: "1"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     depends_on:
       - redis
       - opensearch
