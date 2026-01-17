@@ -27,7 +27,7 @@ defmodule Skywire.Application do
       {Finch, name: Skywire.Finch},
       
       # ML / Embeddings (Local GPU)
-    ] ++ if Application.get_env(:skywire, :start_local_ml, true) do
+    ] ++ if System.get_env("START_LOCAL_ML") != "false" && Application.get_env(:skywire, :start_local_ml, true) do
       [Skywire.ML.Local]
     else
       []
@@ -38,7 +38,7 @@ defmodule Skywire.Application do
       
       # Skywire firehose components (order matters!)
       Skywire.Firehose.CursorStore
-    ] ++ if Application.get_env(:skywire, :start_firehose, true) do
+    ] ++ if System.get_env("START_FIREHOSE") != "false" && Application.get_env(:skywire, :start_firehose, true) do
       [
         Skywire.Firehose.Processor,
         {Skywire.Firehose.Connection, name: Skywire.Firehose.Connection}

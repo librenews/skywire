@@ -29,7 +29,8 @@ services:
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
       
       # Partitioning: Main App is Partition 0/2
-      JETSTREAM_PARTIES: "2"
+      # Partitioning: Main App consumes full Firehose (1/1)
+      JETSTREAM_PARTIES: "1"
       JETSTREAM_PARTITION: "0"
     deploy:
       resources:
@@ -58,15 +59,12 @@ services:
       CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
       
-      JETSTREAM_PARTIES: "2"
-      JETSTREAM_PARTITION: "1"
+      START_LOCAL_ML: "false"
+      START_FIREHOSE: "false"
     deploy:
       resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+        limits:
+          memory: 4G
     depends_on:
       - redis
       - opensearch
