@@ -17,7 +17,7 @@ defmodule Skywire.Firehose.Processor do
   alias Skywire.Firehose.CursorStore
 
   @batch_size 256
-  @flush_interval_ms 100
+  @flush_interval_ms 500
   @max_buffer_size 2000
 
   defmodule State do

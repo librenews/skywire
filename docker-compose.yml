@@ -55,10 +55,6 @@ services:
       XLA_TARGET: "cuda120"
       XLA_PYTHON_CLIENT_PREALLOCATE: "false"
       
-      # Cloudflare Workers AI Credentials
-      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
-      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
-      
       START_LOCAL_ML: "false"
       START_FIREHOSE: "false"
     deploy:
