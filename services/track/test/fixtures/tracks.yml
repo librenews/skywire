@@ -1,0 +1,17 @@
+one:
+  user_id: 1
+  external_id: "123e4567-e89b-12d3-a456-426614174000"
+  query: "ruby on rails"
+  threshold: 0.8
+  status: "active"
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+two:
+  user_id: 1
+  external_id: "223e4567-e89b-12d3-a456-426614174001"
+  query: "python django"
+  threshold: 0.5
+  status: "pending"
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>

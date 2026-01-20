@@ -1,0 +1,114 @@
+<div data-controller="preview" data-preview-token-value="<%= ENV["SKYWIRE_TOKEN"] %>">
+  <%= form_with(model: track, class: "space-y-6") do |form| %>
+    <div class="space-y-6">
+      <p class="text-center text-sm text-gray-500"><em>All fields are optional but either a keyword or a query must be present</em></p>
+      
+        <% if track.errors.any? %>
+          <div class="rounded-md bg-red-50 p-4 mb-6">
+            <div class="flex">
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800"><%= pluralize(track.errors.count, "error") %> prohibited this track from being saved:</h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <% track.errors.each do |error| %>
+                      <li><%= error.full_message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-6">
+            <%= form.label :name, "Track Name (Optional)", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= form.text_field :name, class: "shadow-sm focus:ring-[#287fc6] focus:border-[#287fc6] block w-full sm:text-sm border-gray-300 rounded-md p-3", placeholder: "e.g., 'Competitor Analysis' or 'Ruby News'" %>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">A friendly name for your track. If left blank, one will be generated for you.</p>
+          </div>
+          <div class="sm:col-span-6" data-controller="tags">
+            <label class="block text-sm font-medium text-gray-700">Keywords (Optional)</label>
+            <div class="mt-1 flex items-center flex-wrap gap-2 p-2 border border-gray-300 rounded-md shadow-sm bg-white focus-within:ring-1 focus-within:ring-[#287fc6] focus-within:border-[#287fc6]" data-tags-target="container" data-tags="<%= track.keywords.to_json %>">
+               <!-- Tags will be inserted here -->
+               <input type="text" data-tags-target="input" data-action="keydown->tags#handleKeydown" class="flex-grow border-none focus:outline-none focus:ring-0 p-1 text-sm min-w-[50px]" placeholder="Type keywords and press Enter...">
+            </div>
+            <input type="hidden" name="track[keywords][]" value="">
+            <div data-tags-target="hidden">
+              <!-- Hidden inputs will be generated here -->
+               <% track.keywords.each do |keyword| %>
+                  <input type="hidden" name="track[keywords][]" value="<%= keyword %>">
+               <% end %>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Add exact keywords to filter by. Press Enter or comma to add a tag.</p>
+          </div>
+
+          <div class="sm:col-span-6">
+            <%= form.label :query, "Semantic Query (Optional)", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= form.text_area :query, rows: 3, class: "shadow-sm focus:ring-[#287fc6] focus:border-[#287fc6] block w-full sm:text-sm border-gray-300 rounded-md p-3", placeholder: "e.g., 'ruby on rails' or 'launching a startup'", data: { preview_target: "query" } %>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Enter a natural language query describing what you want to filter.</p>
+          </div>
+
+          <div class="sm:col-span-6" data-controller="range-slider">
+            <label for="track_threshold" class="block text-sm font-medium text-gray-700">Squelch Threshold: <span data-range-slider-target="output" class="text-[#287fc6] font-mono"><%= "%.2f" % (track.threshold || 0.0) %></span></label>
+            <div class="mt-1">
+              <%= form.range_field :threshold, min: 0.0, max: 1.0, step: 0.01, class: "w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer", data: { range_slider_target: "input", action: "input->range-slider#update", preview_target: "threshold" } %>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+               <span>Lenient (0.00)</span>
+               <span>Strict (1.00)</span>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Adjust the similarity threshold. Higher values mean stricter matching.</p>
+          </div>
+        </div>
+    </div>
+
+    <div class="pt-5">
+      <div class="flex justify-between">
+        <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]" data-action="click->preview#start">
+          <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Preview Matches
+        </button>
+        <div class="flex justify-end">
+          <%= link_to "Cancel", tracks_path, class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]" %>
+          <%= form.submit track.inactive? ? "Activate" : "Save Track", class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#287fc6] hover:bg-[#2069a5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]", name: "commit", value: track.inactive? ? "Activate" : "Save Track" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div data-preview-target="modal" class="fixed inset-0 z-50 overflow-y-auto hidden" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" data-action="click->preview#stop"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6 relative z-10">
+        <div class="sm:flex sm:items-start justify-between">
+          <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Live Match Preview</h3>
+            <div class="mt-2">
+              <p data-preview-target="status" class="text-sm text-gray-500">Initializing...</p>
+            </div>
+            
+            <div class="mt-4 h-96 overflow-y-auto border-t border-gray-200 py-4 space-y-3 bg-gray-50 rounded-lg px-2" data-preview-target="results">
+               <!-- Matches go here -->
+               <div class="text-center text-gray-400 mt-20">Waiting for new posts...</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+          <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6] sm:mt-0 sm:w-auto sm:text-sm" data-action="click->preview#stop">
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

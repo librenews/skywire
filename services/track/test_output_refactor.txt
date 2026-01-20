@@ -1,0 +1,214 @@
+Running 5 tests in a single process (parallelization threshold is 50)
+Run options: --seed 20580
+
+# Running:
+
+E
+
+Error:
+TrackTest#test_validates_query_or_keywords_presence:
+ActiveRecord::NotNullViolation: PG::NotNullViolation: ERROR:  null value in column "created_at" of relation "tracks" violates not-null constraint
+DETAIL:  Failing row contains (6, null, 123e4567-e89b-12d3-a456-426614174000, {}, ruby on rails, active, 0.8, null, 1).
+
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `exec'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `perform_query'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:571:in `block (2 levels) in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1086:in `block in with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1055:in `with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:570:in `block in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/notifications/instrumenter.rb:58:in `instrument'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1206:in `log'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:569:in `raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:205:in `execute_batch'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:515:in `block (2 levels) in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/referential_integrity.rb:19:in `disable_referential_integrity'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:514:in `block in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:648:in `block in within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:645:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:386:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:378:in `transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:513:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/track_test.rb:28
+
+E
+
+Error:
+TrackTest#test_valid_factory:
+ActiveRecord::NotNullViolation: PG::NotNullViolation: ERROR:  null value in column "created_at" of relation "tracks" violates not-null constraint
+DETAIL:  Failing row contains (7, null, 123e4567-e89b-12d3-a456-426614174000, {}, ruby on rails, active, 0.8, null, 1).
+
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `exec'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `perform_query'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:571:in `block (2 levels) in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1086:in `block in with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1055:in `with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:570:in `block in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/notifications/instrumenter.rb:58:in `instrument'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1206:in `log'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:569:in `raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:205:in `execute_batch'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:515:in `block (2 levels) in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/referential_integrity.rb:19:in `disable_referential_integrity'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:514:in `block in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:648:in `block in within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:645:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:386:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:378:in `transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:513:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/track_test.rb:4
+
+E
+
+Error:
+TrackTest#test_validates_threshold_range:
+ActiveRecord::NotNullViolation: PG::NotNullViolation: ERROR:  null value in column "created_at" of relation "tracks" violates not-null constraint
+DETAIL:  Failing row contains (8, null, 123e4567-e89b-12d3-a456-426614174000, {}, ruby on rails, active, 0.8, null, 1).
+
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `exec'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `perform_query'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:571:in `block (2 levels) in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1086:in `block in with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1055:in `with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:570:in `block in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/notifications/instrumenter.rb:58:in `instrument'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1206:in `log'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:569:in `raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:205:in `execute_batch'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:515:in `block (2 levels) in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/referential_integrity.rb:19:in `disable_referential_integrity'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:514:in `block in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:648:in `block in within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:645:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:386:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:378:in `transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:513:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/track_test.rb:15
+
+E
+
+Error:
+TrackTest#test_validates_keywords_against_stopwords:
+ActiveRecord::NotNullViolation: PG::NotNullViolation: ERROR:  null value in column "created_at" of relation "tracks" violates not-null constraint
+DETAIL:  Failing row contains (9, null, 123e4567-e89b-12d3-a456-426614174000, {}, ruby on rails, active, 0.8, null, 1).
+
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `exec'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `perform_query'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:571:in `block (2 levels) in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1086:in `block in with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1055:in `with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:570:in `block in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/notifications/instrumenter.rb:58:in `instrument'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1206:in `log'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:569:in `raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:205:in `execute_batch'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:515:in `block (2 levels) in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/referential_integrity.rb:19:in `disable_referential_integrity'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:514:in `block in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:648:in `block in within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:645:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:386:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:378:in `transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:513:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/track_test.rb:43
+
+E
+
+Error:
+TrackTest#test_generates_external_id_on_creation:
+ActiveRecord::NotNullViolation: PG::NotNullViolation: ERROR:  null value in column "created_at" of relation "tracks" violates not-null constraint
+DETAIL:  Failing row contains (10, null, 123e4567-e89b-12d3-a456-426614174000, {}, ruby on rails, active, 0.8, null, 1).
+
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `exec'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:167:in `perform_query'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:571:in `block (2 levels) in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1086:in `block in with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1055:in `with_raw_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:570:in `block in raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/notifications/instrumenter.rb:58:in `instrument'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract_adapter.rb:1206:in `log'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:569:in `raw_execute'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/database_statements.rb:205:in `execute_batch'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:515:in `block (2 levels) in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/postgresql/referential_integrity.rb:19:in `disable_referential_integrity'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:514:in `block in insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:648:in `block in within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/concurrency/null_lock.rb:9:in `synchronize'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/transaction.rb:645:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:386:in `within_new_transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:378:in `transaction'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:513:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/track_test.rb:9
+
+
+
+Finished in 0.062084s, 80.5360 runs/s, 0.0000 assertions/s.
+5 runs, 0 assertions, 0 failures, 5 errors, 0 skips

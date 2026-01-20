@@ -1,0 +1,144 @@
+Running 5 tests in a single process (parallelization threshold is 50)
+Run options: --seed 65034
+
+# Running:
+
+E
+
+Error:
+SubscriptionTest#test_generates_external_id_on_creation:
+ActiveRecord::Fixture::FixtureError: table "subscriptions" has no columns named "callback_url".
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:630:in `block in build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:667:in `block in build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `filter_map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:509:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/subscription_test.rb:9
+
+E
+
+Error:
+SubscriptionTest#test_validates_query_or_keywords_presence:
+ActiveRecord::Fixture::FixtureError: table "subscriptions" has no columns named "callback_url".
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:630:in `block in build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:667:in `block in build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `filter_map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:509:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/subscription_test.rb:28
+
+E
+
+Error:
+SubscriptionTest#test_validates_keywords_against_stopwords:
+ActiveRecord::Fixture::FixtureError: table "subscriptions" has no columns named "callback_url".
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:630:in `block in build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:667:in `block in build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `filter_map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:509:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/subscription_test.rb:43
+
+E
+
+Error:
+SubscriptionTest#test_valid_factory:
+ActiveRecord::Fixture::FixtureError: table "subscriptions" has no columns named "callback_url".
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:630:in `block in build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:667:in `block in build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `filter_map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:509:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/subscription_test.rb:4
+
+E
+
+Error:
+SubscriptionTest#test_validates_threshold_range:
+ActiveRecord::Fixture::FixtureError: table "subscriptions" has no columns named "callback_url".
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:630:in `block in build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:625:in `build_fixture_sql'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:667:in `block in build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `filter_map'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:665:in `build_fixture_statements'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/database_statements.rb:509:in `insert_fixtures_set'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:684:in `block (2 levels) in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/connection_adapters/abstract/connection_pool.rb:463:in `with_connection'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:683:in `block in insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `each'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:674:in `insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:660:in `read_and_insert'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/fixtures.rb:605:in `create_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:282:in `load_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:146:in `setup_fixtures'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activerecord-8.1.2/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    /Users/mterenzi/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/activesupport-8.1.2/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/subscription_test.rb:15
+
+
+
+Finished in 0.122336s, 40.8710 runs/s, 0.0000 assertions/s.
+5 runs, 0 assertions, 0 failures, 5 errors, 0 skips

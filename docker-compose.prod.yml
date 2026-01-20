@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  firehose:
+    environment:
+      # GPU/NVIDIA Configuration for VPS
+      XLA_TARGET: "cuda120"
+      XLA_PYTHON_CLIENT_PREALLOCATE: "false"
+      FIREHOSE_SAMPLE_RATE: "1.0" # Process 100% of events in Production
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  opensearch:
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms8g -Xmx8g" # 8GB Heap for VPS
+

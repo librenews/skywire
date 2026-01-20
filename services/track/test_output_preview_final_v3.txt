@@ -1,0 +1,25 @@
+≈ tailwindcss v4.1.18
+
+Done in 59ms
+Running 11 tests in a single process (parallelization threshold is 50)
+Run options: --seed 43662
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:58416
+.......[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_preview_modal_interaction.png 
+F
+
+Failure:
+SubscriptionsTest#test_preview_modal_interaction [test/system/subscriptions_test.rb:166]:
+expected to find text "Live - Waiting for matches..." in "New Subscription\nSubscription Components\nDefine what you want to track from the Skywire network.\nSearch Query (Optional)\nEnter a natural language query describing what you want to filter.\nKeywords (Optional)\nAdd exact keywords to filter by. Press Enter or comma to add a tag.\nSquelch Threshold: 0.75\nLenient (0.00)\nStrict (1.00)\nAdjust the similarity threshold. Higher values mean stricter matching.\nPreview Matches\nCancel\nLive Match Preview\nJoining channel...\nClose Preview\n© 2026 Track."
+
+bin/rails test test/system/subscriptions_test.rb:153
+
+...
+
+Finished in 9.263396s, 1.1875 runs/s, 3.3465 assertions/s.
+11 runs, 31 assertions, 1 failures, 0 errors, 0 skips

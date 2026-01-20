@@ -1,0 +1,108 @@
+<div class="space-y-6">
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">Tracks</h2>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <%= link_to user_feed_url(current_user.feed_token, format: :rss), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6] mr-3", target: "_blank" do %>
+        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z" /><path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1zM3 15a2 2 0 012-2 3 3 0 013 3 2 2 0 01-2 2 2 2 0 01-3-3z" /></svg>
+        RSS Feed (All)
+      <% end %>
+      <%= link_to "New Track", new_track_path, class: "ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#287fc6] hover:bg-[#2069a5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]" %>
+    </div>
+  </div>
+
+  <% if notice %>
+    <div data-controller="flash" class="rounded-md bg-green-50 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-green-800"><%= notice %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @tracks.empty? %>
+    <div class="text-center py-24">
+      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">You don’t have any Tracks yet.</h3>
+      <p class="mt-1 text-sm text-gray-500">Tracks watch the social stream for topics you care about<br>and deliver relevant posts as they happen.</p>
+      <div class="mt-6">
+        <%= link_to "Create Track", new_track_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#287fc6] hover:bg-[#2069a5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]" %>
+      </div>
+    </div>
+  <% else %>
+    <div class="flex flex-col">
+      <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+          <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signal Volume</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Match</th>
+                  <th scope="col" class="relative px-6 py-3">
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @tracks.each do |track| %>
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <div class="text-base font-semibold"><%= track.name %></div>
+                      <div class="text-gray-500 font-normal truncate max-w-xs" title="<%= track.query %>"><%= track.query %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                      <% status_styles = {
+                        "active" => "bg-green-100 text-green-800",
+                        "inactive" => "bg-gray-100 text-gray-800",
+                        "error" => "bg-red-100 text-red-800",
+                        "pending" => "bg-yellow-100 text-yellow-800"
+                      } %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= status_styles[track.status] %>">
+                        <%= track.status.capitalize %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= track.track_type %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= track.volume_7d %> hits / 7d
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <% if track.last_match_at %>
+                        <%= time_ago_in_words(track.last_match_at) %> ago
+                      <% else %>
+                        Never
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <%= link_to "View", track_path(track), class: "text-gray-600 hover:text-gray-900" %>
+                      <%= link_to "Edit", edit_track_path(track), class: "text-[#287fc6] hover:text-[#2069a5]" %>
+                      <% unless track.inactive? %>
+                        <%= button_to "Pause", deactivate_track_path(track), method: :patch, form: { class: "inline" }, class: "text-amber-600 hover:text-amber-900 bg-transparent border-0 p-0 cursor-pointer" %>
+                      <% else %>
+                        <%= button_to "Activate", activate_track_path(track), method: :patch, form: { class: "inline" }, class: "text-green-600 hover:text-green-900 bg-transparent border-0 p-0 cursor-pointer" %>
+                      <% end %>
+                      <%= button_to "Delete", track, method: :delete, form: { class: "inline" }, class: "text-red-600 hover:text-red-900 bg-transparent border-0 p-0 cursor-pointer", onclick: "return confirm('Are you sure?')" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>

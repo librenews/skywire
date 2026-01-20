@@ -1,0 +1,26 @@
+≈ tailwindcss v4.1.18
+
+Done in 174ms
+Running 6 tests in a single process (parallelization threshold is 50)
+Run options: --seed 39966
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:59666
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_removing_keywords_from_a_subscription.png 
+F
+
+Failure:
+SubscriptionsTest#test_removing_keywords_from_a_subscription [test/system/subscriptions_test.rb:84]:
+Expected: []
+  Actual: ["removable"]
+
+bin/rails test test/system/subscriptions_test.rb:66
+
+.....
+
+Finished in 5.453885s, 1.1001 runs/s, 2.0169 assertions/s.
+6 runs, 11 assertions, 1 failures, 0 errors, 0 skips

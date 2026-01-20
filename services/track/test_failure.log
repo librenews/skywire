@@ -1,0 +1,22 @@
+Running 3 tests in a single process (parallelization threshold is 50)
+Run options: --seed 60780
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:59582
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_creating_a_new_subscription.png 
+F
+
+Failure:
+SubscriptionsTest#test_creating_a_new_subscription [test/system/subscriptions_test.rb:24]:
+expected to find text "Subscription was successfully created" in "Track\nSubscriptions\nLogout\nNew Subscription\nQuery\nEnter a natural language query describing what you want to filter.\nSquelch (Threshold): 0.0\nAdjust the similarity threshold. Higher values mean stricter matching.\nCancel"
+
+bin/rails test test/system/subscriptions_test.rb:13
+
+..
+
+Finished in 6.276185s, 0.4780 runs/s, 0.6373 assertions/s.
+3 runs, 4 assertions, 1 failures, 0 errors, 0 skips

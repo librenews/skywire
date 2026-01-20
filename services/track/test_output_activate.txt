@@ -1,0 +1,44 @@
+≈ tailwindcss v4.1.18
+
+Done in 153ms
+Running 9 tests in a single process (parallelization threshold is 50)
+Run options: --seed 45489
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:56462
+..[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_activating_an_inactive_subscription_from_edit.png 
+E
+
+Error:
+SubscriptionsTest#test_activating_an_inactive_subscription_from_edit:
+Capybara::ElementNotFound: Unable to find link or button "Activate"
+    test/system/subscriptions_test.rb:133:in `block in <class:SubscriptionsTest>'
+
+bin/rails test test/system/subscriptions_test.rb:121
+
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_activating_an_inactive_subscription_from_list.png 
+F
+
+Failure:
+SubscriptionsTest#test_activating_an_inactive_subscription_from_list [test/system/subscriptions_test.rb:115]:
+expected to find text "Active" in "python django 0.5\nPending\nEdit Deactivate Delete"
+
+bin/rails test test/system/subscriptions_test.rb:103
+
+.[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_deactivating_a_subscription.png 
+F
+
+Failure:
+SubscriptionsTest#test_deactivating_a_subscription [test/system/subscriptions_test.rb:97]:
+expected to find text "Inactive" in "python django 0.5\nPending\nEdit Deactivate Delete"
+
+bin/rails test test/system/subscriptions_test.rb:88
+
+...
+
+Finished in 13.259887s, 0.6787 runs/s, 1.2821 assertions/s.
+9 runs, 17 assertions, 2 failures, 1 errors, 0 skips

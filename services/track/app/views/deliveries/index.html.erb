@@ -1,0 +1,124 @@
+<div class="space-y-6">
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">Manage Deliveries</h2>
+      <p class="mt-1 text-sm text-gray-500">For track: <%= link_to @track.name, track_path(@track), class: "text-[#287fc6] hover:underline" %></p>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <%= link_to "Back to Track", track_path(@track), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]" %>
+    </div>
+  </div>
+
+  <% if notice %>
+    <div class="rounded-md bg-green-50 p-4">
+      <p class="text-sm font-medium text-green-800"><%= notice %></p>
+    </div>
+  <% end %>
+
+  <% if @delivery.errors.any? %>
+    <div class="rounded-md bg-red-50 p-4">
+      <h3 class="text-sm font-medium text-red-800">Error adding delivery:</h3>
+      <ul class="list-disc pl-5 mt-2 text-sm text-red-700">
+        <% @delivery.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
+    <!-- List Existing -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Active Deliveries</h3>
+      </div>
+      <div class="border-t border-gray-200">
+        <% if @deliveries.any? %>
+          <ul role="list" class="divide-y divide-gray-200">
+            <% @deliveries.each do |delivery| %>
+              <% unless delivery.new_record? %>
+                <li class="px-4 py-4 sm:px-6 flex items-center justify-between">
+                  <div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 uppercase tracking-wide">
+                      <%= delivery.type.gsub('Delivery', '') %>
+                    </span>
+                    <div class="mt-1 text-sm text-gray-500">
+                      <% case delivery %>
+                      <% when EmailDelivery %>
+                        <span class="font-medium"><%= delivery.email %></span> <span class="text-gray-400">•</span> <%= delivery.frequency %>
+                      <% when SmsDelivery %>
+                        <span class="font-medium"><%= delivery.phone %></span>
+                      <% when WebhookDelivery %>
+                        <span class="font-medium font-mono text-xs"><%= delivery.url %></span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <%= button_to "Remove", track_delivery_path(@track, delivery), method: :delete, class: "text-red-600 hover:text-red-900 text-sm font-medium bg-transparent border-0 cursor-pointer", onclick: "return confirm('Are you sure?')" %>
+                </li>
+              <% end %>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="px-4 py-20 text-center text-sm text-gray-500">
+            No delivery methods configured.
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Add New -->
+    <div class="bg-white shadow sm:rounded-lg" data-controller="delivery-form">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add Delivery Method</h3>
+        
+        <%= form_with(model: [@track, @delivery], as: :delivery, url: track_deliveries_path(@track), local: true, class: "space-y-6") do |f| %>
+          <div>
+            <%= f.label :type, "Delivery Type", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.select :type, 
+                [['Email', 'EmailDelivery'], ['SMS', 'SmsDelivery'], ['Webhook', 'WebhookDelivery']], 
+                { selected: @delivery.type },
+                class: "mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#287fc6] focus:border-[#287fc6] sm:text-sm p-3",
+                data: { action: "change->delivery-form#toggleFields", delivery_form_target: "typeSelect" } 
+            %>
+          </div>
+
+          <!-- Email Fields -->
+          <div data-delivery-form-target="emailFields" class="<%= 'hidden' unless @delivery.is_a?(EmailDelivery) %> space-y-6">
+            <div>
+              <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+              <%= f.email_field :email, class: "mt-1 shadow-sm focus:ring-[#287fc6] focus:border-[#287fc6] block w-full sm:text-sm border-gray-300 rounded-md p-3" %>
+            </div>
+            <div>
+              <%= f.label :frequency, class: "block text-sm font-medium text-gray-700" %>
+              <%= f.select :frequency, %w[instant daily weekly], {}, class: "mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#287fc6] focus:border-[#287fc6] sm:text-sm p-3" %>
+            </div>
+          </div>
+
+          <!-- SMS Fields -->
+          <div data-delivery-form-target="smsFields" class="<%= 'hidden' unless @delivery.is_a?(SmsDelivery) %>">
+            <div>
+              <%= f.label :phone, "Phone Number", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.telephone_field :phone, class: "mt-1 shadow-sm focus:ring-[#287fc6] focus:border-[#287fc6] block w-full sm:text-sm border-gray-300 rounded-md p-3", placeholder: "+1234567890" %>
+            </div>
+          </div>
+
+          <!-- Webhook Fields -->
+          <div data-delivery-form-target="webhookFields" class="<%= 'hidden' unless @delivery.is_a?(WebhookDelivery) %> space-y-6">
+            <div>
+              <%= f.label :url, "Webhook URL", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.url_field :url, class: "mt-1 shadow-sm focus:ring-[#287fc6] focus:border-[#287fc6] block w-full sm:text-sm border-gray-300 rounded-md p-3", placeholder: "https://example.com/callback" %>
+            </div>
+            <div>
+              <%= f.label :secret, "Secret (Optional)", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.text_field :secret, class: "mt-1 shadow-sm focus:ring-[#287fc6] focus:border-[#287fc6] block w-full sm:text-sm border-gray-300 rounded-md p-3" %>
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <%= f.submit "Add Method", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#287fc6] hover:bg-[#2069a5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#287fc6]" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

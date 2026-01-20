@@ -1,0 +1,36 @@
+≈ tailwindcss v4.1.18
+
+Done in 58ms
+Running 3 tests in a single process (parallelization threshold is 50)
+Run options: --seed 59749
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:49723
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_creating_a_new_subscription.png 
+E
+
+Error:
+SubscriptionsTest#test_creating_a_new_subscription:
+Capybara::ElementNotFound: Unable to find link or button "Save Subscription"
+    test/system/subscriptions_test.rb:22:in `block in <class:SubscriptionsTest>'
+
+bin/rails test test/system/subscriptions_test.rb:13
+
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_updating_a_subscription.png 
+E
+
+Error:
+SubscriptionsTest#test_updating_a_subscription:
+Capybara::ElementNotFound: Unable to find link or button "Save Subscription"
+    test/system/subscriptions_test.rb:38:in `block in <class:SubscriptionsTest>'
+
+bin/rails test test/system/subscriptions_test.rb:29
+
+.
+
+Finished in 7.244685s, 0.4141 runs/s, 0.1380 assertions/s.
+3 runs, 1 assertions, 0 failures, 2 errors, 0 skips

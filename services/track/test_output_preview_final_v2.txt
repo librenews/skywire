@@ -1,0 +1,16 @@
+≈ tailwindcss v4.1.18
+
+Done in 89ms
+Running 10 tests in a single process (parallelization threshold is 50)
+Run options: --seed 45182
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:57805
+..........
+
+Finished in 8.054680s, 1.2415 runs/s, 3.6004 assertions/s.
+10 runs, 29 assertions, 0 failures, 0 errors, 0 skips

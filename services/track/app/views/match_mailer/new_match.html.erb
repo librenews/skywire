@@ -1,0 +1,14 @@
+<h1>New Match for <%= @track.name %></h1>
+
+<div style="border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+  <p><strong><%= @post["author"]["handle"] %></strong> says:</p>
+  <p style="font-size: 1.1em;"><%= @post["record"]["text"] %></p>
+  <p><small><%= time_ago_in_words(Time.parse(@post["record"]["createdAt"])) %> ago</small></p>
+  <p>
+    <a href="https://bsky.app/profile/<%= @post["author"]["did"] %>/post/<%= @post["uri"].split("/").last %>" target="_blank">View on Bluesky</a>
+  </p>
+</div>
+
+<p>
+  This post matched your query: <code><%= @track.query %></code>
+</p>

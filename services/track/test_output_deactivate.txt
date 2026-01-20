@@ -1,0 +1,26 @@
+≈ tailwindcss v4.1.18
+
+Done in 124ms
+Running 7 tests in a single process (parallelization threshold is 50)
+Run options: --seed 58398
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:55162
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_deactivating_a_subscription.png 
+E
+
+Error:
+SubscriptionsTest#test_deactivating_a_subscription:
+Capybara::ModalNotFound: Unable to find modal dialog
+    test/system/subscriptions_test.rb:92:in `block in <class:SubscriptionsTest>'
+
+bin/rails test test/system/subscriptions_test.rb:88
+
+......
+
+Finished in 8.312991s, 0.8421 runs/s, 1.3232 assertions/s.
+7 runs, 11 assertions, 0 failures, 1 errors, 0 skips

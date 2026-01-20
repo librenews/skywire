@@ -1,0 +1,49 @@
+≈ tailwindcss v4.1.18
+
+Done in 101ms
+Running 3 tests in a single process (parallelization threshold is 50)
+Run options: --seed 34479
+
+# Running:
+
+Capybara starting Puma...
+* Version 7.1.0, codename: Neon Witch
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:49664
+2026-01-11 10:06:01 -0500 Rack app ("GET /subscriptions" - (127.0.0.1)): #<ActionView::Template::Error: The asset 'MyString' was not found in the load path.>
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_updating_a_subscription.png 
+E
+
+Error:
+SubscriptionsTest#test_updating_a_subscription:
+ActionView::Template::Error: The asset 'MyString' was not found in the load path.
+    app/views/layouts/application.html.erb:41
+
+bin/rails test test/system/subscriptions_test.rb:29
+
+2026-01-11 10:06:02 -0500 Rack app ("GET /subscriptions" - (127.0.0.1)): #<ActionView::Template::Error: The asset 'MyString' was not found in the load path.>
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_destroying_a_subscription.png 
+E
+
+Error:
+SubscriptionsTest#test_destroying_a_subscription:
+ActionView::Template::Error: The asset 'MyString' was not found in the load path.
+    app/views/layouts/application.html.erb:41
+
+bin/rails test test/system/subscriptions_test.rb:44
+
+2026-01-11 10:06:02 -0500 Rack app ("GET /subscriptions" - (127.0.0.1)): #<ActionView::Template::Error: The asset 'MyString' was not found in the load path.>
+[Screenshot Image]: /Users/mterenzi/rails8/track/tmp/screenshots/failures_test_creating_a_new_subscription.png 
+E
+
+Error:
+SubscriptionsTest#test_creating_a_new_subscription:
+ActionView::Template::Error: The asset 'MyString' was not found in the load path.
+    app/views/layouts/application.html.erb:41
+
+bin/rails test test/system/subscriptions_test.rb:13
+
+
+
+Finished in 3.537433s, 0.8481 runs/s, 0.0000 assertions/s.
+3 runs, 0 assertions, 0 failures, 3 errors, 0 skips

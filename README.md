@@ -53,6 +53,21 @@ docker compose up -d
 ```
 *Note: Ensure `opensearch` container gets sufficient memory (configured for 2GB Heap in `docker-compose.yml`).*
 
+## Local Development (Hybrid)
+
+You can run the full stack locally (without a GPU) using the provided override file.
+This will run the Main App using CPU for inference (slower but functional) and the Rails App on port 3001.
+
+```bash
+# Start everything locally (CPU Mode is now default!)
+docker compose up -d --build
+```
+
+- **Firehose (App)**: `http://localhost:4000`
+- **Track (Web)**: `http://localhost:3001`
+- **Postgres**: Exposed on `5432`
+- **Redis**: Exposed on `6379`
+
 ## 🔌 API & Integration
 
 Skywire is designed to be a "Headless" ingestion engine. Your user-facing application (Rails, Node, etc.) consumes its output.

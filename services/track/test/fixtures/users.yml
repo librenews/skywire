@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 1
+  did: did:plc:user1
+  handle: user1.bsky.social
+  display_name: User One
+  avatar_url: https://example.com/avatar.jpg
+  access_token: token1
+  refresh_token: refresh1
+  expires_at: 2026-01-10 09:09:16
+
+two:
+  id: 2
+  did: did:plc:user2
+  handle: user2.bsky.social
+  display_name: User Two
+  avatar_url: https://example.com/avatar2.jpg
+  access_token: token2
+  refresh_token: refresh2
+  expires_at: 2026-01-10 09:09:16

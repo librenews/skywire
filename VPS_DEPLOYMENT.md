@@ -50,6 +50,14 @@ sysctl -w vm.max_map_count=262144
 echo "vm.max_map_count=262144" >> /etc/sysctl.conf
 ```
 
+### Configure Firewall (UFW)
+Important: You must allow HTTP and HTTPS traffic.
+```bash
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw reload
+```
+
 ## 2. Deploy Application
 
 ### Clone Repository
@@ -72,7 +80,8 @@ nano .env
 
 ### Start the Stack
 ```bash
-docker compose up -d --build
+# Use the production override to enable GPU support
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 ### Monitor Startup (Model Download)

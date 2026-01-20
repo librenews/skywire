@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Track" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Track">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= tag :meta, name: "firehose-socket-url", content: ENV.fetch("FIREHOSE_SOCKET_URL", "wss://firehose.social/socket") %>
+
+    <%= yield :head %>
+
+    <%= favicon_link_tag "favicon.png" %>
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-white text-gray-900 font-sans antialiased min-h-screen flex flex-col">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex-shrink-0 flex items-center">
+            <%= image_tag "logo.png", alt: "Track", class: "h-8 w-auto" %>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <% if current_user %>
+               <details class="relative" data-controller="dropdown" data-action="click@window->dropdown#close">
+                  <summary class="list-none cursor-pointer">
+                    <% if current_user.avatar_url %>
+                     <%= image_tag current_user.avatar_url, class: "h-8 w-8 rounded-full ring-2 ring-transparent hover:ring-gray-200" %>
+                   <% else %>
+                     <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                       <%= current_user.handle[0].upcase %>
+                     </div>
+                   <% end %>
+                  </summary>
+                  <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                    <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
+                      @<%= current_user.handle %>
+                    </div>
+                    <%= button_to "Sign Out", logout_path, method: :delete, class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                  </div>
+               </details>
+
+            <% else %>
+              <%= link_to "Login", root_path, class: "text-[#287fc6] hover:text-[#2069a5] font-medium" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <%= yield %>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200">
+       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+         <p class="text-sm text-gray-500">&copy; <%= Time.current.year %> Track.</p>
+       </div>
+    </footer>
+  </body>
+</html>
