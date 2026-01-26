@@ -10,6 +10,10 @@ Rails.application.routes.draw do
 
   get "feeds/:token", to: "feeds#index", as: :user_feed, defaults: { format: :rss }
 
+  # Bluesky Feed Generator endpoints
+  get '/xrpc/app.bsky.feed.getFeedSkeleton', to: 'feed_generator#get_feed_skeleton'
+  get '/xrpc/app.bsky.feed.describeFeedGenerator', to: 'feed_generator#describe_feed_generator'
+  get '/.well-known/did.json', to: 'feed_generator#did_json'
 
   if Rails.env.test?
     get "/test/login", to: "test#login"
