@@ -1,24 +1,20 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Simplified for MVP - only Webhook delivery is available
+// Email and SMS delivery fields are hidden
 export default class extends Controller {
-  static targets = ["typeSelect", "emailFields", "smsFields", "webhookFields"]
+  static targets = ["typeSelect", "webhookFields"]
 
   connect() {
     this.toggleFields()
   }
 
   toggleFields() {
+    // For MVP, only webhook delivery is available
+    // Simply show the webhook fields
     const type = this.typeSelectTarget.value
 
-    this.emailFieldsTarget.classList.add("hidden")
-    this.smsFieldsTarget.classList.add("hidden")
-    this.webhookFieldsTarget.classList.add("hidden")
-
-    if (type === "EmailDelivery") {
-      this.emailFieldsTarget.classList.remove("hidden")
-    } else if (type === "SmsDelivery") {
-      this.smsFieldsTarget.classList.remove("hidden")
-    } else if (type === "WebhookDelivery") {
+    if (type === "WebhookDelivery") {
       this.webhookFieldsTarget.classList.remove("hidden")
     }
   }

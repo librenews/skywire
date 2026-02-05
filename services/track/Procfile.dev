@@ -1,2 +1,2 @@
-web: bin/rails server
+web: PORT=3001 DATABASE_URL=postgres://postgres:postgres@localhost:5432/track_development bin/rails server
 css: bin/rails tailwindcss:watch
