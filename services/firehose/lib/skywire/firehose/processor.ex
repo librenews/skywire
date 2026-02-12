@@ -165,9 +165,12 @@ defmodule Skywire.Firehose.Processor do
           texts = Enum.map(group, fn {event, _} -> get_text(event) end)
           Logger.info("Generating embeddings for #{length(texts)} events (Language: #{lang})...")
           
-          # Use Local ML
-          case Skywire.ML.Local.generate_batch(texts) do
-            nil -> acc # Failed or skipped
+          # Use Local ML with circuit breaker and retry
+          case Skywire.ML.generate_batch(texts) do
+            nil -> 
+              Logger.warning("⚠️  Skipping embeddings for #{length(texts)} #{lang} events due to GPU error (circuit breaker or retry failure)")
+              acc  # Don't add embeddings for this batch
+              
             embeddings when is_list(embeddings) ->
               # Map local group indices to embeddings
               group
@@ -175,7 +178,10 @@ defmodule Skywire.Firehose.Processor do
               |> Enum.reduce(acc, fn {{_event, original_idx}, emb}, map_acc ->
                 Map.put(map_acc, original_idx, emb)
               end)
-            _ -> acc
+              
+            unexpected -> 
+              Logger.error("Unexpected return from generate_batch: #{inspect(unexpected)}")
+              acc
           end
         end)
 

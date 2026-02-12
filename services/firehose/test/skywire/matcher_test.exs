@@ -60,5 +60,39 @@ defmodule Skywire.MatcherTest do
       # Wait a bit for the async Task to finish (dirty, but effective for simple test)
       Process.sleep(50)
     end
+
+
+    test "ignores reposts and non-text events" do
+      post_event = %{
+        repo: "did:plc:123",
+        collection: "app.bsky.feed.post",
+        record: %{"text" => "Valid post", "uri" => "at://...", "rkey" => "999"},
+        indexed_at: DateTime.utc_now()
+      }
+      repost_event = %{
+        repo: "did:plc:456",
+        collection: "app.bsky.feed.repost", # Repost collection
+        record: %{"subject" => "...", "createdAt" => "..."}, # No text
+        indexed_at: DateTime.utc_now()
+      }
+      embedding = [0.1, 0.2]
+
+      events_with_embeddings = [
+        {post_event, embedding},
+        {repost_event, embedding}
+      ]
+
+      # Expect OpenSearch to be called ONLY with the valid post
+      expect(OpenSearchMock, :percolate_batch, fn batch ->
+        assert length(batch) == 1
+        {ev, _} = List.first(batch)
+        assert ev.record["text"] == "Valid post"
+        [] # Return empty matches so we don't need to mock Redis
+      end)
+      
+      Matcher.check_matches(events_with_embeddings)
+      
+      Process.sleep(50)
+    end
   end
 end

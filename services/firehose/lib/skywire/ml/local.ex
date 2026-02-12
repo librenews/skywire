@@ -2,12 +2,27 @@ defmodule Skywire.ML.Local do
   @moduledoc """
   Local Inference Server using Bumblebee and EXLA (GPU).
   Generates text embeddings using BAAE/bge-large-en-v1.5.
+  
+  Includes circuit breaker and retry logic to handle transient GPU errors.
   """
+  @behaviour Skywire.ML
   use GenServer
   require Logger
 
   @serving_name Skywire.ML.Serving
-  @serving_name Skywire.ML.Serving
+
+  # Circuit breaker thresholds
+  @max_consecutive_failures 5
+  @circuit_timeout_ms 60_000  # 60 seconds
+  @max_retries 3
+
+  defmodule State do
+    defstruct consecutive_failures: 0,
+              circuit_open: false,
+              last_failure_time: nil,
+              total_failures: 0,
+              total_successes: 0
+  end
 
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -30,30 +45,128 @@ defmodule Skywire.ML.Local do
     Nx.Serving.start_link(name: @serving_name, serving: serving)
 
     Logger.info("Local ML Serving started successfully.")
-    {:ok, %{}}
+    {:ok, %State{}}
   end
 
   @doc """
   Generates embeddings for a batch of texts.
+  Returns nil if circuit breaker is open or all retries fail.
   """
   def generate_batch(texts, _model \\ nil) do
-    # Note: _model arg is ignored as we currently serve one model locally,
-    # but we keep arity for compatibility with Cloudflare contract.
-    
+    GenServer.call(__MODULE__, {:generate_batch, texts}, 30_000)
+  end
+
+  @doc """
+  Get current circuit breaker state for monitoring.
+  """
+  def get_state do
+    GenServer.call(__MODULE__, :get_state)
+  end
+
+  ## GenServer Callbacks
+
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
+  end
+
+  def handle_call({:generate_batch, texts}, _from, state) do
+    # Check circuit breaker
+    if state.circuit_open do
+      if should_close_circuit?(state) do
+        Logger.info("Circuit breaker: Attempting to close (half-open state)")
+        # Try one request to test if service recovered
+        {result, new_state} = attempt_generation_with_retry(texts, state)
+        {:reply, result, new_state}
+      else
+        time_left = @circuit_timeout_ms - (System.monotonic_time(:millisecond) - state.last_failure_time)
+        Logger.warning("Circuit breaker OPEN - skipping embedding generation (#{div(time_left, 1000)}s remaining)")
+        {:reply, nil, state}
+      end
+    else
+      # Circuit closed - process normally
+      {result, new_state} = attempt_generation_with_retry(texts, state)
+      {:reply, result, new_state}
+    end
+  end
+
+  ## Private Functions
+
+  defp attempt_generation_with_retry(texts, state) do
+    case generate_with_retry(texts, @max_retries) do
+      {:ok, embeddings} ->
+        new_state = record_success(state)
+        {embeddings, new_state}
+      
+      {:error, reason} ->
+        new_state = record_failure(state, reason)
+        {nil, new_state}
+    end
+  end
+
+  defp generate_with_retry(texts, attempts_left) when attempts_left > 0 do
     try do
       output = Nx.Serving.batched_run(@serving_name, texts)
-      # Output is a LIST of maps: [%{encryption: tensor}, ...]
-      # We need to extract the embedding from each and return a list of lists.
-      Enum.map(output, fn result -> 
-        # Bumblebee defaults the output key to :embedding or :pooled_state depending on version?
-        # The error log showed keys: [:embedding]
+      
+      # Extract embeddings from output
+      embeddings = Enum.map(output, fn result -> 
         result.embedding 
         |> Nx.to_flat_list()
       end)
-    rescue
-      e -> 
-        Logger.error("Local Inference Failed: #{inspect(e)}")
-        nil
+      
+      {:ok, embeddings}
+    catch
+      kind, error ->
+        error_msg = Exception.format(kind, error, __STACKTRACE__)
+        
+        if attempts_left > 1 do
+          # Calculate backoff: 100ms, 200ms, 400ms
+          backoff_ms = 100 * (2 ** (@max_retries - attempts_left))
+          Logger.warning("GPU inference failed (#{kind}), retrying in #{backoff_ms}ms (#{attempts_left - 1} retries left)")
+          Logger.debug("Error details: #{error_msg}")
+          
+          :timer.sleep(backoff_ms)
+          generate_with_retry(texts, attempts_left - 1)
+        else
+          Logger.error("GPU inference failed after #{@max_retries} attempts: #{error_msg}")
+          {:error, {kind, error}}
+        end
+    end
+  end
+
+  defp record_success(state) do
+    Logger.debug("GPU inference successful (consecutive failures reset)")
+    %{state | 
+      consecutive_failures: 0,
+      circuit_open: false,
+      total_successes: state.total_successes + 1
+    }
+  end
+
+  defp record_failure(state, reason) do
+    new_consecutive = state.consecutive_failures + 1
+    now = System.monotonic_time(:millisecond)
+    
+    new_state = %{state | 
+      consecutive_failures: new_consecutive,
+      total_failures: state.total_failures + 1,
+      last_failure_time: now
+    }
+    
+    if new_consecutive >= @max_consecutive_failures do
+      Logger.error("Opening circuit breaker after #{new_consecutive} consecutive GPU failures")
+      Logger.error("Last error: #{inspect(reason)}")
+      %{new_state | circuit_open: true}
+    else
+      new_state
+    end
+  end
+
+  defp should_close_circuit?(state) do
+    if state.last_failure_time do
+      elapsed = System.monotonic_time(:millisecond) - state.last_failure_time
+      elapsed >= @circuit_timeout_ms
+    else
+      true
     end
   end
 end

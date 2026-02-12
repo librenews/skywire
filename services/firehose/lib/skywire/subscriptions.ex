@@ -85,13 +85,14 @@ defmodule Skywire.Subscriptions do
         nil
       end
 
-    # 2. Keyword Part (Text Match)
+    # 2. Keyword Part (Exact Word Match, Case-Insensitive)
     keyword_query = 
       if sub.keywords && sub.keywords != [] do
         %{
           "bool" => %{
              "should" => Enum.map(sub.keywords, fn kw -> 
-                %{ "match_phrase" => %{ "text" => kw } }
+                # Use match with operator "and" for exact word matching
+                %{ "match" => %{ "text" => %{ "query" => kw, "operator" => "and" } } }
              end),
              "minimum_should_match" => 1
           }

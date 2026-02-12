@@ -57,7 +57,13 @@ defmodule Skywire.Application do
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Skywire.Supervisor]
+    # Increased restart tolerance for transient failures (e.g., GPU errors)
+    opts = [
+      strategy: :one_for_one, 
+      name: Skywire.Supervisor,
+      max_restarts: 10,   # Allow 10 restarts (default: 3)
+      max_seconds: 60     # Within 60 seconds (default: 5)
+    ]
     
     # Auto-seed HF_TOKEN from environment if present (for dev/pre-shared auth)
     if token = System.get_env("HF_TOKEN") do

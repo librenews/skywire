@@ -1,6 +1,5 @@
 defmodule SkywireWeb.PreviewChannel do
   use SkywireWeb, :channel
-  alias Skywire.ML.Cloudflare
   require Logger
 
   @common_pubsub_topic "firehose"
@@ -22,7 +21,7 @@ defmodule SkywireWeb.PreviewChannel do
       # Generate embedding if query provided
       query_vec = 
         if query && query != "" do
-          case Cloudflare.generate_batch([query]) do
+          case Skywire.ML.generate_batch([query]) do
             [emb] when is_list(emb) -> emb
             _ -> nil
           end
@@ -100,9 +99,13 @@ defmodule SkywireWeb.PreviewChannel do
   defp keyword_match?([], _text), do: false
   defp keyword_match?(_keywords, nil), do: false
   defp keyword_match?(keywords, text) do
-    downcase_text = String.downcase(text)
+    # Use word boundaries for exact word matching (case-insensitive)
     Enum.any?(keywords, fn kw -> 
-      String.contains?(downcase_text, String.downcase(kw))
+      # Escape special regex characters in the keyword
+      escaped_kw = Regex.escape(kw)
+      # Create regex with word boundaries for exact match
+      pattern = ~r/\b#{escaped_kw}\b/i
+      Regex.match?(pattern, text)
     end)
   end
   

@@ -7,7 +7,7 @@ xml.rss version: "2.0" do
 
     @matches.each do |match|
       xml.item do
-        xml.title match.text.truncate(50)
+        xml.title match.text&.truncate(50) || "New Match"
         xml.description match.text
         xml.pubDate match.indexed_at.rfc822
         xml.link match.bsky_url

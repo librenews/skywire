@@ -1,12 +1,9 @@
 defmodule SkywireWeb.EmbeddingController do
   use SkywireWeb, :controller
-  # import Ecto.Query
-  # alias Skywire.{Repo, Firehose.Event, ML.Cloudflare}
-  alias Skywire.ML.Cloudflare
 
   def generate(conn, %{"text" => text}) do
-    # Generate embedding using Cloudflare API
-    case Cloudflare.generate_batch([text]) do
+    # Generate embedding using ML proxy
+    case Skywire.ML.generate_batch([text]) do
       [vector] when is_list(vector) -> 
         json(conn, %{embedding: vector})
       _ -> 
