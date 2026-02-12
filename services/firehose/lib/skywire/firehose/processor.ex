@@ -166,7 +166,7 @@ defmodule Skywire.Firehose.Processor do
           Logger.info("Generating embeddings for #{length(texts)} events (Language: #{lang})...")
           
           # Use Local ML with circuit breaker and retry
-          case Skywire.ML.Local.generate_batch(texts) do
+          case Skywire.ML.generate_batch(texts) do
             nil -> 
               Logger.warning("⚠️  Skipping embeddings for #{length(texts)} #{lang} events due to GPU error (circuit breaker or retry failure)")
               acc  # Don't add embeddings for this batch

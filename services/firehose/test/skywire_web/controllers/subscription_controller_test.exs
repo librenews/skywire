@@ -59,7 +59,7 @@ defmodule SkywireWeb.SubscriptionControllerTest do
 
     test "creates subscription with keywords only (no embedding)", %{conn: conn} do
       conn = authenticate(conn)
-      # 0. Expect NO Embedding Generation (CloudflareMock should trigger error if called)
+      # No embedding generation expected for keyword-only subscription
       
       # 1. Expect OpenSearch Indexing
       expect(OpenSearchMock, :index_subscription, fn "sub_456", doc ->

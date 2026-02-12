@@ -2,7 +2,7 @@
 
 **Skywire** is a high-throughput, real-time firehose ingestion and semantic search engine for the Bluesky/AT Protocol network.
 
-It consumes the entire network stream (~50-100 posts/sec), generates semantic embeddings in real-time using **Cloudflare Workers AI**, and indexes them into **OpenSearch** for instant vector similarity search and "percolation" (reverse search) alerting.
+It consumes the entire network stream (~50-100 posts/sec), generates semantic embeddings in real-time using **Bumblebee/EXLA** (local GPU inference with BAAI/bge-large-en-v1.5), and indexes them into **OpenSearch** for instant vector similarity search and "percolation" (reverse search) alerting.
 
 ## 🏗️ Architecture
 
@@ -11,7 +11,7 @@ Skywire runs as a lean, containerized microservice stack:
 1.  **Skywire App (Elixir/Phoenix):**
     -   Connects to Bluesky Jetstream (`wss://jetstream1.us-east.bsky.network`).
     -   Filters & batches events.
-    -   Generates embeddings via **Cloudflare Workers AI** (BGE-M3/MiniLM).
+    -   Generates embeddings via **Bumblebee/EXLA** (BAAI/bge-large-en-v1.5) on local GPU.
 2.  **OpenSearch (NoSQL Vector Database):**
     -   Stores processed events.
     -   Performs K-NN (Vector) search.
@@ -20,7 +20,7 @@ Skywire runs as a lean, containerized microservice stack:
     -   Deduplication cache.
     -   **Output Stream:** Pushes matched events to `skywire:matches` for downstream consumers (e.g., Rails App).
 
-> **Note:** This project uses a "Lightweight" architecture. It has **zero** local ML dependencies (no Python, no Bumblebee, no Torch) to keep the Docker image small (<200MB) and RAM usage low.
+> **Note:** This project uses local GPU inference via Bumblebee/EXLA for embedding generation. The Docker image is based on NVIDIA CUDA for GPU acceleration.
 
 ## 🚀 Deployment
 
@@ -34,10 +34,9 @@ The recommended deployment is via **Docker Compose** on a VPS (e.g., DigitalOcea
 ### 1. Configure Environment
 Enable the necessary variables in `.env`:
 ```bash
-# Cloudflare AI (Required for Embeddings)
-CLOUDFLARE_ACCOUNT_ID=...
-CLOUDFLARE_API_TOKEN=...
-HF_TOKEN=...
+# ML Model (Optional, defaults to BAAI/bge-large-en-v1.5)
+ML_MODEL_ID=BAAI/bge-large-en-v1.5
+XLA_TARGET=cuda120  # or 'host' for CPU-only
 
 # Persistence
 EVENT_RETENTION_DAYS=3

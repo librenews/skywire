@@ -21,7 +21,7 @@ defmodule Skywire.Debug do
   end
   def check_vector_magnitude do
     vec = 
-      case Skywire.ML.Cloudflare.generate_batch(["test string"]) do
+      case Skywire.ML.generate_batch(["test string"]) do
         [emb] when is_list(emb) -> emb
         _ -> nil
       end
