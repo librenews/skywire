@@ -5,7 +5,7 @@ defmodule SkywireWeb.SubscriptionControllerTest do
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
   
-  alias Skywire.ML.CloudflareMock
+  alias Skywire.ML.Mock, as: MLMock
   alias Skywire.Search.OpenSearchMock
   alias Skywire.RedisMock
 
@@ -33,7 +33,7 @@ defmodule SkywireWeb.SubscriptionControllerTest do
       conn = authenticate(conn)
       
       # 1. Expect Embedding Generation
-      expect(CloudflareMock, :generate_batch, fn ["artificial intelligence"], _model ->
+      expect(MLMock, :generate_batch, fn ["artificial intelligence"], _model ->
         [[0.1, 0.2, 0.3]] # Return one embedding
       end)
 
@@ -41,7 +41,7 @@ defmodule SkywireWeb.SubscriptionControllerTest do
       expect(OpenSearchMock, :index_subscription, fn "sub_123", doc ->
         # For pure semantic query, it's a script query, not bool
         assert doc["query"]["script"] 
-        {:ok, %{}}
+        {:ok, %{status: 201}}
       end)
 
       payload = %{
@@ -65,7 +65,7 @@ defmodule SkywireWeb.SubscriptionControllerTest do
       expect(OpenSearchMock, :index_subscription, fn "sub_456", doc ->
         # Assert structure for keyword-only
         assert doc["threshold"] == 0.8
-        {:ok, %{}}
+        {:ok, %{status: 201}}
       end)
 
       payload = %{

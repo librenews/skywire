@@ -5,6 +5,7 @@ defmodule Skywire.ML.Local do
   
   Includes circuit breaker and retry logic to handle transient GPU errors.
   """
+  @behaviour Skywire.ML
   use GenServer
   require Logger
 

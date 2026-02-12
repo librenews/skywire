@@ -14,7 +14,7 @@ defmodule SkywireWeb.SubscriptionController do
     
     vector_result = 
       if query && query != "" do
-        case Skywire.ML.Local.generate_batch([query]) do
+        case Skywire.ML.generate_batch([query]) do
           [emb] when is_list(emb) -> emb
           _ -> nil
         end

@@ -1,9 +1,9 @@
 import Config
 
 # Mock Implementations
-config :skywire, :cloudflare_impl, Skywire.ML.CloudflareMock
 config :skywire, :opensearch_impl, Skywire.Search.OpenSearchMock
 config :skywire, :redis_impl, Skywire.RedisMock
+config :skywire, :ml_impl, Skywire.ML.Mock
 
 # Disable OpenSearch startup usage in Test
 config :skywire, :check_opensearch_on_startup, false

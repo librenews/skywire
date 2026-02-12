@@ -100,9 +100,13 @@ defmodule SkywireWeb.PreviewChannel do
   defp keyword_match?([], _text), do: false
   defp keyword_match?(_keywords, nil), do: false
   defp keyword_match?(keywords, text) do
-    downcase_text = String.downcase(text)
+    # Use word boundaries for exact word matching (case-insensitive)
     Enum.any?(keywords, fn kw -> 
-      String.contains?(downcase_text, String.downcase(kw))
+      # Escape special regex characters in the keyword
+      escaped_kw = Regex.escape(kw)
+      # Create regex with word boundaries for exact match
+      pattern = ~r/\b#{escaped_kw}\b/i
+      Regex.match?(pattern, text)
     end)
   end
   
