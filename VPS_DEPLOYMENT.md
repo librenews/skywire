@@ -104,8 +104,16 @@ apt-get install -y caddy
 
 Edit Caddyfile (`nano /etc/caddy/Caddyfile`):
 ```text
-your-domain.com {
+firehose.social {
     reverse_proxy localhost:4000
+}
+
+track.social {
+    reverse_proxy localhost:3001
+}
+
+feeds.social {
+    reverse_proxy localhost:4001
 }
 ```
 
