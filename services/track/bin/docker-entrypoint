@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
-# Ensure tmp and log directories exist and are writable
-# This fixes permission issues with host-mounted volumes in development
+# Ensure the container always boots with a clean tmp cache and no stale PID files.
+# Persistent host-volume mappings can leave root-owned files that crash subsequent boots.
+rm -rf tmp/cache/* tmp/pids/server.pid 2>/dev/null || true
 mkdir -p tmp/cache tmp/pids tmp/sockets log storage
 chmod -R 777 tmp log storage 2>/dev/null || true
 
