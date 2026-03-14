@@ -78,6 +78,7 @@ services:
         condition: service_started
     volumes:
       - ./services/track:/rails
+      - track_tmp:/rails/tmp
 
   postgres:
     image: postgres:15
@@ -135,3 +136,4 @@ volumes:
   postgres_data:
   opensearch_data:
   redis_data:
+  track_tmp:
