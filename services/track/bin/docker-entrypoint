@@ -1,8 +1,14 @@
 #!/bin/bash -e
 
+# Ensure tmp and log directories exist and are writable
+# This fixes permission issues with host-mounted volumes in development
+mkdir -p tmp/cache tmp/pids tmp/sockets log storage
+chmod -R 777 tmp log storage 2>/dev/null || true
+
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+  rm -f tmp/pids/server.pid
 fi
 
 exec "${@}"
