@@ -37,6 +37,20 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+  # Node.js Feeds Service
+  feeds:
+    build: ./services/feeds
+    ports:
+      - "4001:4001"
+    restart: unless-stopped
+    environment:
+      PORT: "4001"
+      FEEDS_DOMAIN: ${FEEDS_DOMAIN:-feeds.social}
+      OPENSEARCH_URL: http://opensearch:9200
+      OPENSEARCH_INDEX: "firehose_events"
+    depends_on:
+      opensearch:
+        condition: service_healthy
 
   # Rails Web App
   track:
