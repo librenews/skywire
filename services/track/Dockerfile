@@ -93,10 +93,14 @@ RUN bundle install
 
 COPY . .
 
+# Run and own only the runtime files as a non-root user for security
+RUN groupadd --system --gid 1000 rails && \
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
 
-# We run as root in development to avoid permission issues with host volume mounts.
-# USER 1000:1000
-
+# Create necessary directories and set loose permissions for mounted volumes
+RUN mkdir -p tmp/cache tmp/pids tmp/sockets log storage && \
+    chown -R rails:rails tmp log storage && \
+    chmod -R 777 tmp log storage || true
 
 EXPOSE 3000
 CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
