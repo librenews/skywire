@@ -24,7 +24,7 @@ module TrackApp
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    require_relative '../lib/sendgrid_mailer'
+    require_relative '../lib/send_grid_mailer'
     
     config.action_mailer.delivery_method = :sendgrid
     config.action_mailer.sendgrid_settings = {
