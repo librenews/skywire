@@ -1,20 +1,19 @@
-version: "3.8"
 services:
+  track:
+    build:
+      context: ./services/track
+      target: production
+    command: bash -c "bin/rails db:prepare && bin/thrust bin/rails server"
+    volumes: []  # No bind mounts in production - assets are baked into the image
+    environment:
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+
   firehose:
     environment:
-      # GPU/NVIDIA Configuration for VPS
-      XLA_TARGET: "cuda120"
-      XLA_PYTHON_CLIENT_PREALLOCATE: "false"
       FIREHOSE_SAMPLE_RATE: "1.0" # Process 100% of events in Production
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
 
   opensearch:
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms8g -Xmx8g" # 8GB Heap for VPS
-
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
