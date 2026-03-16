@@ -52,22 +52,23 @@ services:
       opensearch:
         condition: service_healthy
 
-  # Rails Web App
+  # Rails Web App (Production)
   track:
-    build: 
+    build:
       context: ./services/track
-      target: development
+      target: production
     ports:
-      - "3001:3000"
-    command: bash -c "mkdir -p tmp/cache tmp/pids tmp/sockets log storage && chmod -R 777 tmp log storage 2>/dev/null; rm -f tmp/pids/server.pid && bundle exec rails tailwindcss:build && bundle exec rails s -b 0.0.0.0"
+      - "3001:80"
+    command: bash -c "bin/rails db:prepare && bin/thrust ./bin/rails server"
     environment:
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE} # Fallback if Master Key is missing
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       RAILS_HOST: ${RAILS_HOST}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/track_development
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/track_production
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      RAILS_ENV: development
       FIREHOSE_SOCKET_URL: ws://localhost:4000/socket
       FIREHOSE_API_URL: http://firehose:4000/api
       SKYWIRE_TOKEN: ${HF_TOKEN}
@@ -76,9 +77,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    volumes:
-      - ./services/track:/rails
-      - track_tmp:/rails/tmp
 
   postgres:
     image: postgres:15
