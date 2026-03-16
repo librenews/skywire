@@ -30,3 +30,12 @@ skywire-*.tar
 .env
 .env*.local
 deps/
+
+# Node
+node_modules/
+**/node_modules/
+npm-debug.log*
+
+# Ruby / Rails
+*.log
+tmp/
