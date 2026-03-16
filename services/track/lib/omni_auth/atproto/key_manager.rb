@@ -87,11 +87,11 @@ module OmniAuth
       private
 
       def self.private_key_path
-        Rails.root.join("config", "atproto_private_key.pem")
+        Rails.root.join("storage", "keys", "atproto_private_key.pem")
       end
 
       def self.jwk_path
-        Rails.root.join("config", "atproto_jwk.json")
+        Rails.root.join("storage", "keys", "atproto_jwk.json")
       end
     end
   end
