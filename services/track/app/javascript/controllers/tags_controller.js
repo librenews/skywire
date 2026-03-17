@@ -6,6 +6,18 @@ export default class extends Controller {
   connect() {
     this.initialTags = JSON.parse(this.containerTarget.dataset.tags || "[]")
     this.initialTags.forEach(tag => this.addTag(tag))
+
+    // Commit any pending input when the form submits
+    const form = this.element.closest("form")
+    if (form) {
+      form.addEventListener("submit", () => {
+        const value = this.inputTarget.value.trim().replace(/,/g, "")
+        if (value) {
+          this.addTag(value)
+          this.inputTarget.value = ""
+        }
+      })
+    }
   }
 
   handleKeydown(event) {
@@ -34,12 +46,8 @@ export default class extends Controller {
         </svg>
       </button>
     `
-    // Store the value in a data attribute
     tag.dataset.value = text
-
-    // Insert before the input
     this.containerTarget.insertBefore(tag, this.inputTarget)
-
     this.updateHiddenInput()
   }
 
@@ -57,8 +65,7 @@ export default class extends Controller {
   }
 
   hasTag(text) {
-    const existing = this.currentTags()
-    return existing.includes(text)
+    return this.currentTags().includes(text)
   }
 
   currentTags() {
@@ -66,9 +73,7 @@ export default class extends Controller {
   }
 
   updateHiddenInput() {
-    // Clear existing hidden inputs
     this.hiddenTarget.innerHTML = ""
-
     this.currentTags().forEach(tag => {
       const input = document.createElement("input")
       input.type = "hidden"
