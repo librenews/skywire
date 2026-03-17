@@ -72,7 +72,7 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       FIREHOSE_SOCKET_URL: ws://localhost:4000/socket
       FIREHOSE_API_URL: http://firehose:4000/api
-      SKYWIRE_TOKEN: ${HF_TOKEN}
+      SKYWIRE_TOKEN: ${SKYWIRE_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy
