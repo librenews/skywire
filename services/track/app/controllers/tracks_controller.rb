@@ -1,5 +1,6 @@
 class TracksController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:feed]
+  before_action :require_login, except: [:feed]
   before_action :set_track, only: %i[ show edit update destroy deactivate activate feed ]
 
   def index
