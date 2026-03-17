@@ -3,7 +3,8 @@ set -e
 
 echo "🚀 Deploying Skywire..."
 
-# Pull latest code
+# Discard any stale local changes and pull latest code
+git checkout -- .
 git pull origin main
 
 # Build the production track image (includes asset compilation)
