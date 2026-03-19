@@ -135,7 +135,7 @@ module Skywire
     end
 
     def handle_match(data)
-      ProcessMatchJob.perform_later(data)
+      ProcessMatchJob.perform_now(data)
     end
   end
 end
