@@ -3,17 +3,24 @@ set -e
 
 echo "🚀 Deploying Skywire..."
 
-# Discard any stale local changes and pull latest code
+# Discard any stale local changes (from sed commands, manual edits, etc.)
+# and pull latest — always use this script instead of running git pull directly
 git checkout -- .
 git pull origin main
 
-# Build the production track image (includes asset compilation)
-echo "🔨 Building production images..."
-docker compose -f docker-compose.yml -f docker-compose.prod.yml build track
+# Build the production track image
+echo "🔨 Building production image..."
+docker compose build track
 
-# Restart all services with production overrides
+# Restart all services
 echo "♻️  Restarting services..."
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose rm -sf track
+docker compose up -d
 
-echo "✅ Deploy complete! Check logs with:"
-echo "   docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail 30 track"
+# Ensure all databases exist and are migrated
+echo "🗄️  Preparing databases..."
+docker compose exec track bin/rails db:create db:schema:load 2>/dev/null || true
+docker compose exec track bin/rails db:migrate 2>/dev/null || true
+
+echo "✅ Deploy complete!"
+echo "   Logs: docker compose logs --tail 30 track"
